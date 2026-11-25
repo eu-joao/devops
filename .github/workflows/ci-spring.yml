@@ -1,0 +1,39 @@
+name: CI - Spring Boot
+
+on:
+  workflow_call:
+    inputs:
+      java_version:
+        description: Versão do Java
+        type: string
+        default: "21"
+      working_directory:
+        description: Pasta do projeto Maven dentro do repositório
+        type: string
+        default: "."
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java_version }}
+          cache: maven
+
+      - name: Build e testes
+        run: |
+          if [ -f mvnw ]; then
+            bash ./mvnw -B verify
+          else
+            mvn -B verify
+          fi

@@ -1,0 +1,96 @@
+name: Agente - atualizar dependências
+
+on:
+  workflow_call:
+    inputs:
+      devops_repository:
+        description: Repositório com prompts e scripts (dono/nome)
+        type: string
+        required: true
+      devops_ref:
+        description: Branch ou tag do repositório de prompts e scripts
+        type: string
+        default: main
+      agent_cli:
+        description: CLI do agente (claude, codex, gemini ou vibe)
+        type: string
+        default: claude
+      model:
+        description: Modelo a usar; vazio usa o padrão do CLI
+        type: string
+        default: ""
+      prompt_file:
+        description: Prompt a usar, relativo à raiz do repositório de prompts
+        type: string
+        default: prompts/deps.md
+      java_version:
+        description: Versão do Java, usada se o projeto tiver pom.xml
+        type: string
+        default: "21"
+      node_version:
+        description: Versão do Node, usada se o projeto tiver package.json
+        type: string
+        default: "20"
+    secrets:
+      AGENT_API_KEY:
+        required: true
+
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout do projeto
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout dos prompts e scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.devops_repository }}
+          ref: ${{ inputs.devops_ref }}
+          path: .agents
+          persist-credentials: false
+
+      - name: Java (se houver pom.xml)
+        if: hashFiles('**/pom.xml') != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java_version }}
+          cache: maven
+
+      - name: Node (se houver package.json)
+        if: hashFiles('**/package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Instalar o agente
+        env:
+          AGENT_CLI: ${{ inputs.agent_cli }}
+        run: bash .agents/scripts/install-agent.sh
+
+      - name: Rodar o agente
+        env:
+          AGENT_CLI: ${{ inputs.agent_cli }}
+          MODEL: ${{ inputs.model }}
+          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
+          AGENT_MODE: edit
+          PROMPT_FILE: ${{ inputs.prompt_file }}
+        run: bash .agents/scripts/run-agent.sh ".agents/${PROMPT_FILE}" "$RUNNER_TEMP/pr-body.md"
+
+      - name: Abrir o Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          OUT="$RUNNER_TEMP/pr-body.md"
+          if [ ! -s "$OUT" ] || grep -q '^SEM_MUDANCAS' "$OUT"; then
+            echo "O agente não propôs mudanças."
+            exit 0
+          fi
+          bash .agents/scripts/open-pr.sh deps "chore(deps): atualiza dependências" "$OUT"

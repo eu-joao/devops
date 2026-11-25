@@ -1,0 +1,82 @@
+name: Agente - review de PR
+
+on:
+  workflow_call:
+    inputs:
+      devops_repository:
+        description: Repositório com prompts e scripts (dono/nome)
+        type: string
+        required: true
+      devops_ref:
+        description: Branch ou tag do repositório de prompts e scripts
+        type: string
+        default: main
+      agent_cli:
+        description: CLI do agente (claude, codex, gemini ou vibe)
+        type: string
+        default: claude
+      model:
+        description: Modelo a usar; vazio usa o padrão do CLI
+        type: string
+        default: ""
+      prompt_file:
+        description: Prompt a usar, relativo à raiz do repositório de prompts
+        type: string
+        default: prompts/review.md
+    secrets:
+      AGENT_API_KEY:
+        required: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout do projeto
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout dos prompts e scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.devops_repository }}
+          ref: ${{ inputs.devops_ref }}
+          path: .agents
+          persist-credentials: false
+
+      - name: Instalar o agente
+        env:
+          AGENT_CLI: ${{ inputs.agent_cli }}
+        run: bash .agents/scripts/install-agent.sh
+
+      - name: Rodar o review
+        env:
+          AGENT_CLI: ${{ inputs.agent_cli }}
+          MODEL: ${{ inputs.model }}
+          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
+          AGENT_MODE: readonly
+          PROMPT_FILE: ${{ inputs.prompt_file }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          export AGENT_CONTEXT="Pull Request #${PR_NUMBER}. Para ver as mudanças use: git diff origin/${BASE_REF}...HEAD"
+          bash .agents/scripts/run-agent.sh ".agents/${PROMPT_FILE}" "$RUNNER_TEMP/review.md"
+
+      - name: Comentar no PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          OUT="$RUNNER_TEMP/review.md"
+          if [ ! -s "$OUT" ]; then
+            echo "O agente não gerou saída; nada a comentar."
+            exit 0
+          fi
+          gh pr comment "$PR_NUMBER" --body-file "$OUT" --edit-last --create-if-none \
+            || gh pr comment "$PR_NUMBER" --body-file "$OUT"

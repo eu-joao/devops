@@ -1,0 +1,24 @@
+# Copie para .github/workflows/ci.yml do projeto.
+# Troque SEU_USUARIO pelo seu usuário do GitHub, ajuste working_directory
+# para as pastas reais e apague o job que o projeto não usa.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    permissions:
+      contents: read
+    uses: SEU_USUARIO/devops/.github/workflows/ci-spring.yml@main
+    with:
+      working_directory: backend
+
+  frontend:
+    permissions:
+      contents: read
+    uses: SEU_USUARIO/devops/.github/workflows/ci-react.yml@main
+    with:
+      working_directory: frontend

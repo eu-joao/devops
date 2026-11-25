@@ -1,0 +1,26 @@
+# Copie para .github/workflows/review.yml do projeto.
+# Troque SEU_USUARIO pelo seu usuário do GitHub.
+# Ao trocar @main por uma tag (ex.: @v1), troque também devops_ref.
+name: Review por agente
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: SEU_USUARIO/devops/.github/workflows/agent-review-pr.yml@main
+    with:
+      devops_repository: SEU_USUARIO/devops
+      devops_ref: main
+      agent_cli: claude
+    secrets:
+      AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}

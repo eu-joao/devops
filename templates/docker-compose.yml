@@ -1,0 +1,16 @@
+# Exemplo para subir backend e frontend juntos.
+# Copie para a raiz do projeto e ajuste os caminhos e as portas.
+# Variáveis de ambiente e banco de dados dependem de cada projeto.
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.agent-*
+.agents/
+*.log
+.idea/
+.vscode/
+.DS_Store
