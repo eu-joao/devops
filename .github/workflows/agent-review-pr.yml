@@ -12,7 +12,7 @@ on:
         type: string
         default: main
       agent_provider:
-        description: Provedor de IA que executará a tarefa: mistral-vibe ou gemini.
+        description: "Provedor de IA que executará a tarefa: mistral-vibe ou gemini."
         type: string
         default: mistral-vibe
       model:
