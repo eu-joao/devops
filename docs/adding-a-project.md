@@ -1,10 +1,14 @@
 # Adicionando um projeto
 
-## 1. Configure o CI
+## 1. Escolha o workflow
 
-Os workflows de CI são reutilizáveis e ficam centralizados neste repositório. No projeto consumidor, crie um arquivo chamador em `.github/workflows/ci.yml` que referencia o workflow adequado com `uses`. Não copie os arquivos de implementação de CI.
+A implementação da CI é mantida em `eu-joao/devops`. No projeto consumidor, crie apenas um arquivo de configuração em `.github/workflows/` que define os eventos e referencia o workflow reutilizável adequado com `uses`.
 
-Para Vue, React ou outros projetos Node:
+Não copie workflows de implementação, scripts, etapas de instalação ou templates deste repositório.
+
+### Vue, React ou outro projeto Node
+
+Crie, por exemplo, `.github/workflows/ci.yml`:
 
 ```yaml
 name: CI
@@ -25,7 +29,11 @@ jobs:
       package_manager: npm
 ```
 
-Para Spring Boot/Maven, troque o workflow e ajuste os parâmetros:
+O workflow Node também aceita os inputs `run_lint`, `run_tests` e `run_build`, que permitem habilitar ou desabilitar essas etapas. Cada etapa é executada somente quando habilitada e quando o script correspondente existe no `package.json`.
+
+### Spring Boot/Maven
+
+Aponte o job para `ci-spring.yml`:
 
 ```yaml
 jobs:
@@ -38,26 +46,32 @@ jobs:
       working_directory: "."
 ```
 
-Se o projeto tiver backend e frontend independentes, declare dois jobs, cada um chamando o workflow correspondente e informando seu próprio `working_directory`. Os exemplos completos estão em [templates/callers/](../templates/callers/).
+Se frontend e backend estiverem em diretórios independentes, declare um job para cada workflow e informe o respectivo `working_directory`.
 
-O arquivo chamador é necessário para definir os eventos e parâmetros específicos do projeto. A implementação dos jobs, instalação de ferramentas, testes e build permanece no repositório central.
+Os eventos e branches são definidos no arquivo local. O workflow central executa instalação, lint, testes e build, conforme a stack e os inputs. Os inputs e seus valores padrão estão descritos nos próprios arquivos de workflow.
 
-Não é necessário configurar secrets, GitHub App ou agente para usar CI.
+Não é necessário configurar secrets, GitHub App ou agente para usar a CI determinística.
 
 ## 2. (Opcional) Habilite agentes
 
-Crie arquivos chamadores para as automações que deseja habilitar, usando os exemplos em `templates/callers/`. Eles também chamam workflows reutilizáveis deste repositório; não copie a implementação dos agentes.
+Os workflows de agentes também são reutilizáveis. No repositório consumidor, crie um arquivo pequeno em `.github/workflows/` para o evento desejado e aponte para um dos workflows centrais:
 
-Escolha `mistral-vibe` ou `gemini` e configure somente a chave correspondente. Sem a chave, o agente é ignorado; o CI determinístico continua funcionando normalmente.
+- `agent-review-pr.yml`: revisão de pull requests.
+- `agent-triage-issue.yml`: triagem de issues.
+- `agent-update-deps.yml`: atualização de dependências.
+
+Informe o input obrigatório `devops_repository: eu-joao/devops`. Use `devops_ref` para selecionar a branch, tag ou SHA do repositório compartilhado. Configure o `agent_provider` como `mistral-vibe` ou `gemini` e encaminhe os secrets necessários ao workflow reutilizável. Consulte [secrets.md](secrets.md) e [permissions.md](permissions.md).
+
+Sem a chave do provedor selecionado, o agente é ignorado com aviso. A CI determinística não depende dessas credenciais.
 
 ## 3. (Opcional) Configure o GitHub App
 
-Para comentários e PRs automáticos, crie um GitHub App, instale-o no projeto e configure `GH_APP_ID` e `GH_APP_PRIVATE_KEY`. Consulte [secrets.md](secrets.md).
+Para comentários e PRs automáticos, crie um GitHub App, instale-o no projeto e configure `GH_APP_ID` e `GH_APP_PRIVATE_KEY`. Conceda somente as permissões necessárias à automação habilitada. Consulte [secrets.md](secrets.md).
 
-## 4. Teste
+## 4. Valide a integração
 
-Abra um PR e confirme que o CI roda. Habilite agentes separadamente e verifique seus logs. Não execute automações de edição em repositórios cujo código ou scripts não sejam confiáveis.
+Abra um pull request ou faça um push correspondente aos eventos definidos no arquivo local e confirme que o workflow central foi executado. Habilite e valide agentes separadamente. Não execute automações de edição em repositórios cujo código ou scripts não sejam confiáveis.
 
 ## 5. Fixe uma versão
 
-Durante o desenvolvimento, os callers podem usar `@main` para acompanhar as alterações deste repositório. Depois de validar uma versão estável, publique uma tag e atualize os callers para essa referência. Para máxima previsibilidade, use um SHA completo.
+Durante o desenvolvimento, `@main` acompanha as alterações mais recentes deste repositório. Depois de validar uma versão estável, prefira uma tag e atualize a referência no arquivo local. Para máxima previsibilidade, use um SHA completo.
