@@ -17,9 +17,9 @@ jobs:
 
       - name: Instalar ferramentas
         run: |
-          # Ignore failures from third-party runner repositories; Ubuntu packages
-          # are still refreshed and installed from the configured Ubuntu mirrors.
-          sudo apt-get update -o APT::Update::Error-Mode=none
+          # Third-party runner repositories may be unavailable; continue with
+          # Ubuntu package indexes and let installation validate required packages.
+          sudo apt-get update || echo "::warning::Some APT repositories failed to update; continuing with available package indexes."
           sudo apt-get install -y bats shellcheck
 
       - name: ShellCheck
