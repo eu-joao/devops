@@ -1,17 +1,54 @@
 # Adicionando um projeto
 
-## 1. Configure somente o CI
+## 1. Configure o CI
 
-Copie `templates/callers/ci.yml` para `.github/workflows/ci.yml`. Ajuste os diretórios e remova jobs que o projeto não usa.
+Os workflows de CI são reutilizáveis e ficam centralizados neste repositório. No projeto consumidor, crie um arquivo chamador em `.github/workflows/ci.yml` que referencia o workflow adequado com `uses`. Não copie os arquivos de implementação de CI.
 
-- Vue/React/Node: `ci-node.yml`.
-- Spring Boot/Maven: `ci-spring.yml`.
+Para Vue, React ou outros projetos Node:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-node.yml@main
+    with:
+      node_version: "22"
+      working_directory: "."
+      package_manager: npm
+```
+
+Para Spring Boot/Maven, troque o workflow e ajuste os parâmetros:
+
+```yaml
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-spring.yml@main
+    with:
+      java_version: "21"
+      working_directory: "."
+```
+
+Se o projeto tiver backend e frontend independentes, declare dois jobs, cada um chamando o workflow correspondente e informando seu próprio `working_directory`. Os exemplos completos estão em [templates/callers/](../templates/callers/).
+
+O arquivo chamador é necessário para definir os eventos e parâmetros específicos do projeto. A implementação dos jobs, instalação de ferramentas, testes e build permanece no repositório central.
 
 Não é necessário configurar secrets, GitHub App ou agente para usar CI.
 
 ## 2. (Opcional) Habilite agentes
 
-Escolha `mistral-vibe` ou `gemini`, configure somente a chave correspondente e copie os callers de review, triagem ou dependências que desejar. Sem a chave, o agente é ignorado; o CI independente continua funcionando.
+Crie arquivos chamadores para as automações que deseja habilitar, usando os exemplos em `templates/callers/`. Eles também chamam workflows reutilizáveis deste repositório; não copie a implementação dos agentes.
+
+Escolha `mistral-vibe` ou `gemini` e configure somente a chave correspondente. Sem a chave, o agente é ignorado; o CI determinístico continua funcionando normalmente.
 
 ## 3. (Opcional) Configure o GitHub App
 
@@ -23,4 +60,4 @@ Abra um PR e confirme que o CI roda. Habilite agentes separadamente e verifique 
 
 ## 5. Fixe uma versão
 
-Durante desenvolvimento, os callers podem usar `@main`. Depois de validar uma versão estável, publique uma tag e atualize os callers para ela.
+Durante o desenvolvimento, os callers podem usar `@main` para acompanhar as alterações deste repositório. Depois de validar uma versão estável, publique uma tag e atualize os callers para essa referência. Para máxima previsibilidade, use um SHA completo.
