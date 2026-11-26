@@ -1,45 +1,19 @@
-name: CI - React
+# Compatibilidade retroativa. Novos projetos devem chamar ci-node.yml.
+name: CI - React (compatibilidade)
 
 on:
   workflow_call:
     inputs:
       node_version:
-        description: Versão do Node
         type: string
         default: "20"
       working_directory:
-        description: Pasta do projeto React dentro do repositório
         type: string
         default: "."
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: ${{ inputs.working_directory }}
-    env:
-      CI: "true"
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node_version }}
-          cache: npm
-          cache-dependency-path: ${{ inputs.working_directory }}/package-lock.json
-
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint --if-present
-
-      - name: Testes
-        run: npm test --if-present
-
-      - name: Build
-        run: npm run build --if-present
+    uses: ./.github/workflows/ci-node.yml
+    with:
+      node_version: ${{ inputs.node_version }}
+      working_directory: ${{ inputs.working_directory }}
