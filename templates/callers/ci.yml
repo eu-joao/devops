@@ -1,4 +1,4 @@
-# CI sem agentes e sem secrets. Copie para .github/workflows/ci.yml.
+# CI sem agentes e sem secrets. Remova os jobs que o projeto não utiliza.
 name: CI
 
 on:
