@@ -5,9 +5,11 @@ on:
   workflow_call:
     inputs:
       node_version:
+        description: Versão do Node.js usada para instalar dependências e executar as verificações.
         type: string
         default: "20"
       working_directory:
+        description: Diretório do projeto dentro do repositório onde os comandos serão executados.
         type: string
         default: "."
 
