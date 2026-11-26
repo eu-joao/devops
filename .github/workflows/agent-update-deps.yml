@@ -100,7 +100,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           MODEL: ${{ inputs.model }}
           AGENT_MODE: edit
-        env:
           PROMPT_FILE: ${{ inputs.prompt_file }}
         run: bash .agents/agents/runtime/run-agent.sh ".agents/$PROMPT_FILE" "$RUNNER_TEMP/pr-body.md"
 
