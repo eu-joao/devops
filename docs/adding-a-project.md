@@ -1,41 +1,26 @@
 # Adicionando um projeto
 
-Passo a passo para ligar um projeto novo aos workflows deste repositório.
+## 1. Configure somente o CI
 
-## 1. Criar o secret
+Copie `templates/callers/ci.yml` para `.github/workflows/ci.yml`. Ajuste os diretórios e remova jobs que o projeto não usa.
 
-No repositório do projeto, vá em **Settings > Secrets and variables > Actions** e crie o secret `AGENT_API_KEY` com a chave de API do agente escolhido. Veja [secrets.md](./secrets.md).
+- Vue/React/Node: `ci-node.yml`.
+- Spring Boot/Maven: `ci-spring.yml`.
 
-## 2. Ajustar as configurações do Actions
+Não é necessário configurar secrets, GitHub App ou agente para usar CI.
 
-Em **Settings > Actions > General > Workflow permissions**, ative **Allow GitHub Actions to create and approve pull requests**. Só é preciso para o workflow de dependências.
+## 2. (Opcional) Habilite agentes
 
-## 3. Copiar os arquivos de chamada
+Escolha `mistral-vibe` ou `gemini`, configure somente a chave correspondente e copie os callers de review, triagem ou dependências que desejar. Sem a chave, o agente é ignorado; o CI independente continua funcionando.
 
-Copie de `templates/callers/` para `.github/workflows/` do projeto os arquivos que quiser usar:
+## 3. (Opcional) Configure o GitHub App
 
-- `ci.yml`: build e testes;
-- `review.yml`: review de PR por agente;
-- `deps.yml`: atualização semanal de dependências;
-- `triage.yml`: triagem de issues (opcional).
+Para comentários e PRs automáticos, crie um GitHub App, instale-o no projeto e configure `GH_APP_ID` e `GH_APP_PRIVATE_KEY`. Consulte [secrets.md](secrets.md).
 
-Em cada arquivo, troque `SEU_USUARIO` pelo seu usuário do GitHub. No `ci.yml`, ajuste `working_directory` e apague o job que o projeto não usa.
+## 4. Teste
 
-## 4. Escolher o agente
+Abra um PR e confirme que o CI roda. Habilite agentes separadamente e verifique seus logs. Não execute automações de edição em repositórios cujo código ou scripts não sejam confiáveis.
 
-O campo `agent_cli` aceita `claude`, `codex`, `gemini` ou `vibe`. O secret `AGENT_API_KEY` precisa ser a chave do provedor desse CLI. Para trocar de agente, mude `agent_cli` e o valor do secret.
+## 5. Fixe uma versão
 
-## 5. Testar
-
-Abra um PR de teste e confira se o comentário do review aparece. Para dependências, rode o workflow manualmente em **Actions > Atualizar dependências > Run workflow**.
-
-## 6. Fixar uma versão
-
-Com tudo funcionando, crie uma tag neste repositório e use-a nos projetos, para que uma mudança aqui não quebre todos de uma vez:
-
-```bash
-git tag v1
-git push origin v1
-```
-
-Nos arquivos de chamada, troque `@main` por `@v1` e `devops_ref: main` por `devops_ref: v1`. Os dois precisam ser trocados juntos.
+Durante desenvolvimento, os callers podem usar `@main`. Depois de validar uma versão estável, publique uma tag e atualize os callers para ela.
