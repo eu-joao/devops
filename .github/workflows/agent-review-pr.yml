@@ -23,7 +23,7 @@ on:
         required: false
       GEMINI_API_KEY:
         required: false
-      GH_APP_CLIENT_ID:
+      GH_APP_ID:
         required: false
       GH_APP_PRIVATE_KEY:
         required: false
@@ -89,9 +89,9 @@ jobs:
         id: app-config
         if: steps.agent.outputs.ran == 'true'
         env:
-          GH_APP_CLIENT_ID: ${{ secrets.GH_APP_CLIENT_ID }}
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
         run: |
-          if [ -n "$GH_APP_CLIENT_ID" ]; then
+          if [ -n "$GH_APP_ID" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
@@ -102,10 +102,10 @@ jobs:
         id: app-token
         if: steps.agent.outputs.ran == 'true' && steps.app-config.outputs.enabled == 'true'
         env:
-          GH_APP_CLIENT_ID: ${{ secrets.GH_APP_CLIENT_ID }}
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
         uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
-          app-id: ${{ secrets.GH_APP_CLIENT_ID }}
+          app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           permission-pull-requests: write
 
