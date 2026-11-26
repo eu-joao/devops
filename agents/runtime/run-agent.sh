@@ -26,5 +26,6 @@ case "$PROVIDER" in
   gemini) RUNNER="$ROOT/agents/providers/gemini.sh" ;;
   *) echo "Provedor não suportado: $PROVIDER" >&2; exit 2 ;;
 esac
+# shellcheck disable=SC1090
 if [ -n "$OUTPUT_FILE" ]; then source "$RUNNER" > "$OUTPUT_FILE"; else source "$RUNNER"; fi
 if [ -n "${GITHUB_OUTPUT:-}" ]; then echo "ran=true" >> "$GITHUB_OUTPUT"; fi
