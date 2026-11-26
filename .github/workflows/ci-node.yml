@@ -12,7 +12,7 @@ on:
         type: string
         default: "."
       package_manager:
-        description: Gerenciador e lockfile (npm ou pnpm ou yarn)
+        description: Gerenciador e lockfile (npm, pnpm ou yarn)
         type: string
         default: npm
       run_lint:
@@ -53,37 +53,57 @@ jobs:
         run: corepack enable
 
       - name: Instalar dependências
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
         run: |
-          case "${{ inputs.package_manager }}" in
+          case "$PACKAGE_MANAGER" in
             npm) npm ci ;;
             pnpm) pnpm install --frozen-lockfile ;;
             yarn) corepack yarn install --immutable ;;
-            *) echo "package_manager inválido" >&2; exit 1 ;;
+            *) echo "package_manager inválido: $PACKAGE_MANAGER" >&2; exit 1 ;;
           esac
 
       - name: Lint
         if: inputs.run_lint
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
         run: |
-          case "${{ inputs.package_manager }}" in
-            npm) npm run lint --if-present ;;
-            pnpm) pnpm run lint --if-present ;;
-            yarn) corepack yarn run lint --if-present ;;
+          if ! node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint ? 0 : 1)"; then
+            echo "Script lint ausente; etapa ignorada."
+            exit 0
+          fi
+          case "$PACKAGE_MANAGER" in
+            npm) npm run lint ;;
+            pnpm) pnpm run lint ;;
+            yarn) corepack yarn run lint ;;
           esac
 
       - name: Testes
         if: inputs.run_tests
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
         run: |
-          case "${{ inputs.package_manager }}" in
-            npm) npm test --if-present ;;
-            pnpm) pnpm test --if-present ;;
-            yarn) corepack yarn test --if-present ;;
+          if ! node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)"; then
+            echo "Script test ausente; etapa ignorada."
+            exit 0
+          fi
+          case "$PACKAGE_MANAGER" in
+            npm) npm test ;;
+            pnpm) pnpm test ;;
+            yarn) corepack yarn test ;;
           esac
 
       - name: Build
         if: inputs.run_build
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
         run: |
-          case "${{ inputs.package_manager }}" in
-            npm) npm run build --if-present ;;
-            pnpm) pnpm run build --if-present ;;
-            yarn) corepack yarn run build --if-present ;;
+          if ! node -e "const s=require('./package.json').scripts||{}; process.exit(s.build ? 0 : 1)"; then
+            echo "Script build ausente; etapa ignorada."
+            exit 0
+          fi
+          case "$PACKAGE_MANAGER" in
+            npm) npm run build ;;
+            pnpm) pnpm run build ;;
+            yarn) corepack yarn build ;;
           esac
