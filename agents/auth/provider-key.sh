@@ -6,4 +6,3 @@ case "$AGENT_PROVIDER" in
   gemini) AGENT_PROVIDER_KEY="${GEMINI_API_KEY:-}" ;;
   *) echo "AGENT_PROVIDER inválido: $AGENT_PROVIDER" >&2; exit 2 ;;
 esac
-export AGENT_PROVIDER_KEY
