@@ -62,36 +62,7 @@ SH
   chmod +x "$BIN/vibe"
   run env PATH="$BIN:$PATH" AGENT_PROVIDER_KEY=test-key AGENT_PROMPT=prompt CAPTURE="$OUTPUT" RUNNER_TEMP="$BATS_TEST_TMPDIR" AGENT_MODE=edit bash -c 'source "$1"' _ "$ROOT/agents/providers/mistral-vibe.sh"
   [ "$status" -eq 0 ]
-  ! grep -q '^--auto-approve
-  grep -q 'allowlist = \["git status", "git diff", "git log", "git show", "npm"' "$BATS_TEST_TMPDIR/vibe-home/agents/devops-ci.toml"
-}
-
-@test "adaptador Gemini usa Plan Mode e política de comandos de leitura" {
-  cat > "$BIN/gemini" <<'SH'
-#!/usr/bin/env bash
-printf '%s\n' "$GEMINI_API_KEY" "$@" > "$CAPTURE"
-SH
-  chmod +x "$BIN/gemini"
-  run env PATH="$BIN:$PATH" AGENT_PROVIDER_KEY=test-key AGENT_PROMPT=prompt CAPTURE="$OUTPUT" RUNNER_TEMP="$BATS_TEST_TMPDIR" AGENT_MODE=readonly bash -c 'source "$1"' _ "$ROOT/agents/providers/gemini.sh"
-  [ "$status" -eq 0 ]
-  grep -q '^test-key$' "$OUTPUT"
-  grep -q '^--approval-mode$' "$OUTPUT"
-  grep -q '^plan$' "$OUTPUT"
-  grep -q 'modes = \["plan"\]' "$BATS_TEST_TMPDIR/gemini-devops-policy.toml"
-}
-
-@test "adaptador Gemini usa auto-edit com comandos de projeto restritos" {
-  cat > "$BIN/gemini" <<'SH'
-#!/usr/bin/env bash
-printf '%s\n' "$@" > "$CAPTURE"
-SH
-  chmod +x "$BIN/gemini"
-  run env PATH="$BIN:$PATH" AGENT_PROVIDER_KEY=test-key AGENT_PROMPT=prompt CAPTURE="$OUTPUT" RUNNER_TEMP="$BATS_TEST_TMPDIR" AGENT_MODE=edit bash -c 'source "$1"' _ "$ROOT/agents/providers/gemini.sh"
-  [ "$status" -eq 0 ]
-  grep -q '^auto_edit$' "$OUTPUT"
-  grep -q 'commandPrefix = \["git status", "git diff", "git log", "git show", "npm"' "$BATS_TEST_TMPDIR/gemini-devops-policy.toml"
-}
- "$OUTPUT"
+  ! grep -q '^--auto-approve$' "$OUTPUT"
   grep -q 'allowlist = \["git status", "git diff", "git log", "git show", "npm"' "$BATS_TEST_TMPDIR/vibe-home/agents/devops-ci.toml"
 }
 
