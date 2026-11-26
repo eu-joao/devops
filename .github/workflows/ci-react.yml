@@ -15,8 +15,7 @@ jobs:
   build:
     permissions:
       contents: read
-    # zizmor: ignore[self-repository] -- actionlint exige o caminho relativo documentado pelo GitHub.
-    uses: ./.github/workflows/ci-node.yml
+    uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
       node_version: ${{ inputs.node_version }}
       working_directory: ${{ inputs.working_directory }}
