@@ -20,7 +20,7 @@ jobs:
 
       - name: ShellCheck
         run: |
-          find scripts agents -type f -name '*.sh' -print0 | xargs -0 shellcheck
+          find scripts agents -type f -name '*.sh' -print0 | xargs -0 shellcheck -x
 
       - name: Testes dos scripts
         run: bats tests/
