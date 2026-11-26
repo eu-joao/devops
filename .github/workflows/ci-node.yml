@@ -1,0 +1,89 @@
+name: CI - Node (Vue, React e outros)
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Versão do Node.js
+        type: string
+        default: "22"
+      working_directory:
+        description: Diretório do projeto
+        type: string
+        default: "."
+      package_manager:
+        description: Gerenciador e lockfile (npm ou pnpm ou yarn)
+        type: string
+        default: npm
+      run_lint:
+        type: boolean
+        default: true
+      run_tests:
+        type: boolean
+        default: true
+      run_build:
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: |
+            ${{ inputs.working_directory }}/package-lock.json
+            ${{ inputs.working_directory }}/pnpm-lock.yaml
+            ${{ inputs.working_directory }}/yarn.lock
+
+      - name: Ativar pnpm
+        if: inputs.package_manager == 'pnpm'
+        run: corepack enable
+
+      - name: Instalar dependências
+        run: |
+          case "${{ inputs.package_manager }}" in
+            npm) npm ci ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            yarn) corepack yarn install --immutable ;;
+            *) echo "package_manager inválido" >&2; exit 1 ;;
+          esac
+
+      - name: Lint
+        if: inputs.run_lint
+        run: |
+          case "${{ inputs.package_manager }}" in
+            npm) npm run lint --if-present ;;
+            pnpm) pnpm run lint --if-present ;;
+            yarn) corepack yarn run lint --if-present ;;
+          esac
+
+      - name: Testes
+        if: inputs.run_tests
+        run: |
+          case "${{ inputs.package_manager }}" in
+            npm) npm test --if-present ;;
+            pnpm) pnpm test --if-present ;;
+            yarn) corepack yarn test --if-present ;;
+          esac
+
+      - name: Build
+        if: inputs.run_build
+        run: |
+          case "${{ inputs.package_manager }}" in
+            npm) npm run build --if-present ;;
+            pnpm) pnpm run build --if-present ;;
+            yarn) corepack yarn run build --if-present ;;
+          esac
