@@ -1,25 +1,35 @@
 # Contribuindo
 
-## Sumário
+## Organização
 
-- [Branches](#branches)
-- [Commits](#commits)
-- [Pull Requests](#pull-requests)
+- A implementação compartilhada fica em `.github/workflows/`, `agents/`, `scripts/` e `prompts/`.
+- Projetos consumidores devem precisar apenas de arquivos chamadores pequenos, que selecionam o workflow central e definem eventos e parâmetros. Não reintroduza cópias da implementação nem templates de callers neste repositório.
+- Preserve a separação entre CI determinística e automações opcionais com IA. A CI não deve depender de secrets de provedores ou de um GitHub App.
+- Agentes não podem receber tokens do GitHub; publicação e comentários devem continuar em etapas separadas, usando o GitHub App.
 
 ## Branches
 
-Use o formato `<número-da-issue>-<descrição-curta>`, em minúsculas e separado por hífen. Exemplo: `12-agente-review-pr`.
+Use `<número-da-issue>-<descrição-curta>`, em minúsculas e separado por hífen.
 
 ## Commits
 
-Use o formato `tipo: descrição`, em português e no imperativo. Os tipos são `feat`, `fix`, `docs`, `ci` e `chore`. Exemplo: `feat: adiciona workflow de review de PR`.
+Use `tipo: descrição`, em português e no imperativo. Tipos: `feat`, `fix`, `docs`, `ci`, `chore`.
 
 ## Pull Requests
 
-O que a descrição de um PR precisa ter:
+Descreva o que mudou, a issue relacionada e dependências externas. Não faça merge sem revisão humana.
 
-- **O que mudou?** Uma a três frases, direto ao ponto.
-- **Issue:** link ou `#número`.
-- **Outras dependências:** `N/A` ou a lista.
+Ao alterar um workflow reutilizável, revise também seus inputs, descrições, permissões e comportamento esperado nos repositórios consumidores. Mantenha as descrições dos inputs: elas facilitam configuração e revisão. Fixe actions externas por SHA completo.
 
-Antes de abrir o PR, teste a mudança em um projeto de verdade: aponte o arquivo de chamada para a sua branch usando `@nome-da-branch` e `devops_ref: nome-da-branch`.
+## Validação local
+
+- `shellcheck -x` nos scripts shell.
+- `bats tests/agents` para os testes dos scripts.
+- `actionlint` nos workflows.
+- `zizmor .github/workflows` para análise de segurança.
+
+Os testes automatizados não devem chamar provedores de IA reais nem consumir cotas. Prefira testes com comandos simulados e credenciais fictícias.
+
+## CI
+
+O workflow `.github/workflows/ci-devops.yml` executa as verificações do próprio repositório. A CI dos projetos consumidores é fornecida pelos workflows reutilizáveis `ci-node.yml` e `ci-spring.yml`; mudanças nesses arquivos devem manter a configuração local dos consumidores mínima e compatível.

@@ -1,21 +1,36 @@
 # Secrets
 
-Os workflows de agente usam um único secret, `AGENT_API_KEY`. O script `run-agent.sh` entrega essa chave ao CLI pela variável que ele espera.
+## Chaves dos provedores
 
-| `agent_cli` | Variável usada pelo CLI | Onde gerar a chave |
+Configure somente o secret do provedor escolhido em **Settings > Secrets and variables > Actions**.
+
+| Provider | Secret no repositório consumidor | Variável usada pelo CLI |
 |---|---|---|
-| `claude` | `ANTHROPIC_API_KEY` | Console da Anthropic |
-| `codex` | `OPENAI_API_KEY` | Painel da OpenAI |
-| `gemini` | `GEMINI_API_KEY` | Google AI Studio |
-| `vibe` | `MISTRAL_API_KEY` | Mistral Studio |
+| Mistral Vibe | `MISTRAL_VIBE_CODE_KEY` | `MISTRAL_API_KEY` |
+| Gemini CLI | `GEMINI_API_KEY` | `GEMINI_API_KEY` |
 
-## Onde criar
+Não existe mais `AGENT_API_KEY`. Sem a chave correspondente, a etapa de IA é ignorada e o CI continua normalmente. Se a chave estiver configurada e for inválida, a execução deve falhar explicitamente.
 
-Em cada projeto: **Settings > Secrets and variables > Actions > New repository secret**. O nome precisa ser exatamente `AGENT_API_KEY`.
+Use a chave específica do Vibe Code, não presuma que uma chave da API tradicional do Mistral Studio tenha a mesma quota ou condições. Para Gemini, verifique os termos de tratamento de dados do nível gratuito antes de enviar código privado.
+
+## GitHub App
+
+Secrets necessários:
+- `GH_APP_ID`: ID numérico do aplicativo.
+- `GH_APP_PRIVATE_KEY`: chave privada PEM do aplicativo.
+
+Permissões mínimas:
+- Contents: read/write (workflow de atualização de dependências).
+- Pull requests: read/write (criar PR e comentar em PR).
+- Issues: read/write (comentar em issues).
+
+Instale o App apenas nos repositórios que usarão essas automações. O token de instalação é criado depois da execução do agente e nunca é exposto ao processo do modelo. O token tem validade curta.
+
+O token de instalação permite que PRs criados pelo workflow iniciem workflows subsequentes, ao contrário da limitação usual do `GITHUB_TOKEN`.
 
 ## Cuidados
 
-- Nunca coloque a chave no código, nos prompts ou em arquivos `.env` versionados.
-- Defina um limite de gasto no painel do provedor. Um agente em loop pode consumir créditos rápido.
-- PRs vindos de forks não recebem secrets. Nesse caso o agente é pulado, com um aviso no log.
-- Se o repositório `devops` for privado, o segundo checkout dos workflows não consegue lê-lo com o token padrão do Actions. O caminho mais simples é manter `devops` público, já que ele não guarda segredos. A alternativa é criar um token (PAT) ou uma deploy key com leitura só nesse repositório e usá-lo nesse checkout.
+- Nunca versionar secrets ou arquivos de credenciais.
+- Não disponibilizar secrets a workflows disparados por forks.
+- Não imprimir valores de secrets nos logs.
+- Não passar tokens do GitHub como contexto ou variável ao agente.

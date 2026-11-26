@@ -4,79 +4,119 @@ on:
   workflow_call:
     inputs:
       devops_repository:
-        description: Repositório com prompts e scripts (dono/nome)
+        description: Repositório que contém os workflows, scripts, adaptadores e prompts compartilhados.
         type: string
         required: true
       devops_ref:
-        description: Branch ou tag do repositório de prompts e scripts
+        description: Branch, tag ou SHA do repositório compartilhado que será utilizado.
         type: string
         default: main
-      agent_cli:
-        description: CLI do agente (claude, codex, gemini ou vibe)
+      agent_provider:
+        description: "Provedor de IA que executará a tarefa: mistral-vibe ou gemini."
         type: string
-        default: claude
+        default: mistral-vibe
       model:
-        description: Modelo a usar; vazio usa o padrão do CLI
+        description: Identificador opcional do modelo a ser utilizado pelo provedor escolhido.
         type: string
         default: ""
       prompt_file:
-        description: Prompt a usar, relativo à raiz do repositório de prompts
+        description: Caminho do arquivo de prompt, relativo à raiz do repositório compartilhado.
         type: string
         default: prompts/review.md
     secrets:
-      AGENT_API_KEY:
-        required: true
+      MISTRAL_VIBE_CODE_KEY:
+        required: false
+      GEMINI_API_KEY:
+        required: false
+      GH_APP_ID:
+        required: false
+      GH_APP_PRIVATE_KEY:
+        required: false
 
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     steps:
-      - name: Checkout do projeto
-        uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Checkout dos prompts e scripts
-        uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.devops_repository }}
           ref: ${{ inputs.devops_ref }}
           path: .agents
           persist-credentials: false
 
-      - name: Instalar o agente
+      - name: Verificar chave do provedor
+        id: provider-key
         env:
-          AGENT_CLI: ${{ inputs.agent_cli }}
+          AGENT_PROVIDER: ${{ inputs.agent_provider }}
+          MISTRAL_VIBE_CODE_KEY: ${{ secrets.MISTRAL_VIBE_CODE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          case "$AGENT_PROVIDER" in
+            mistral-vibe) KEY="$MISTRAL_VIBE_CODE_KEY" ;;
+            gemini) KEY="$GEMINI_API_KEY" ;;
+            *) echo "Provedor inválido: $AGENT_PROVIDER" >&2; exit 2 ;;
+          esac
+          if [ -n "$KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Chave ausente; execução do agente será ignorada."
+          fi
+
+      - name: Instalar CLI
+        if: steps.provider-key.outputs.configured == 'true'
+        env:
+          AGENT_PROVIDER: ${{ inputs.agent_provider }}
         run: bash .agents/scripts/install-agent.sh
 
-      - name: Rodar o review
+      - name: Executar review
+        id: agent
         env:
-          AGENT_CLI: ${{ inputs.agent_cli }}
+          AGENT_PROVIDER: ${{ inputs.agent_provider }}
+          MISTRAL_VIBE_CODE_KEY: ${{ secrets.MISTRAL_VIBE_CODE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           MODEL: ${{ inputs.model }}
-          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
           AGENT_MODE: readonly
+          AGENT_CONTEXT: "Pull Request #${{ github.event.pull_request.number }}. Analise git diff origin/${{ github.base_ref }}...HEAD."
           PROMPT_FILE: ${{ inputs.prompt_file }}
-          BASE_REF: ${{ github.base_ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .agents/agents/runtime/run-agent.sh ".agents/$PROMPT_FILE" "$RUNNER_TEMP/review.md"
+
+      - name: Verificar configuração do GitHub App
+        id: app-config
+        if: steps.agent.outputs.ran == 'true'
+        env:
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
         run: |
-          export AGENT_CONTEXT="Pull Request #${PR_NUMBER}. Para ver as mudanças use: git diff origin/${BASE_REF}...HEAD"
-          bash .agents/scripts/run-agent.sh ".agents/${PROMPT_FILE}" "$RUNNER_TEMP/review.md"
+          if [ -n "$GH_APP_ID" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado; o agente executou, mas a publicação foi ignorada."
+          fi
+
+      - name: Criar token do GitHub App
+        id: app-token
+        if: steps.agent.outputs.ran == 'true' && steps.app-config.outputs.enabled == 'true'
+        env:
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
 
       - name: Comentar no PR
+        if: steps.agent.outputs.ran == 'true' && steps.app-token.outputs.token != ''
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          OUT="$RUNNER_TEMP/review.md"
-          if [ ! -s "$OUT" ]; then
-            echo "O agente não gerou saída; nada a comentar."
-            exit 0
-          fi
-          gh pr comment "$PR_NUMBER" --body-file "$OUT" --edit-last --create-if-none \
-            || gh pr comment "$PR_NUMBER" --body-file "$OUT"
+        run: gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/review.md"
