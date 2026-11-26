@@ -3,7 +3,7 @@ set -euo pipefail
 PROMPT_FILE="${1:?uso: run-agent.sh <prompt> [arquivo-saida]}"
 OUTPUT_FILE="${2:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PROVIDER="${AGENT_PROVIDER:-${AGENT_CLI:-mistral-vibe}}"
+PROVIDER="${AGENT_PROVIDER:-mistral-vibe}"
 MODE="${AGENT_MODE:-readonly}"
 export AGENT_PROVIDER="$PROVIDER" AGENT_MODE="$MODE"
 export AGENT_TIMEOUT="${AGENT_TIMEOUT:-900}" AGENT_MAX_TURNS="${AGENT_MAX_TURNS:-12}"
@@ -18,8 +18,8 @@ fi
 if [ ! -f "$PROMPT_FILE" ]; then echo "Prompt não encontrado: $PROMPT_FILE" >&2; exit 1; fi
 SHARED="$ROOT/prompts/shared/project-rules.md"
 if [ ! -f "$SHARED" ]; then echo "Regras compartilhadas não encontradas: $SHARED" >&2; exit 1; fi
-AGENT_PROMPT="$(cat "$SHARED"; printf '\n\n'; cat "$PROMPT_FILE")"
-if [ -n "${AGENT_CONTEXT:-}" ]; then AGENT_PROMPT+=$'\n\n## Contexto desta execução\n\n'"$AGENT_CONTEXT"; fi
+AGENT_PROMPT="$(cat "$SHARED"; printf '\\n\\n'; cat "$PROMPT_FILE")"
+if [ -n "${AGENT_CONTEXT:-}" ]; then AGENT_PROMPT+=$'\\n\\n## Contexto desta execução\\n\\n'"$AGENT_CONTEXT"; fi
 export AGENT_PROMPT
 case "$PROVIDER" in
   mistral-vibe) RUNNER="$ROOT/agents/providers/mistral-vibe.sh" ;;
