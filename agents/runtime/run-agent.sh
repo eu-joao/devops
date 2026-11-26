@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck source=../auth/provider-key.sh
 set -euo pipefail
 PROMPT_FILE="${1:?uso: run-agent.sh <prompt> [arquivo-saida]}"
 OUTPUT_FILE="${2:-}"
