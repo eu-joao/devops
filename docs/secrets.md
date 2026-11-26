@@ -16,7 +16,7 @@ Use a chave específica do Vibe Code, não presuma que uma chave da API tradicio
 ## GitHub App
 
 Secrets necessários:
-- `GH_APP_CLIENT_ID`: Client ID do aplicativo.
+- `GH_APP_ID`: ID numérico do aplicativo.
 - `GH_APP_PRIVATE_KEY`: chave privada PEM do aplicativo.
 
 Permissões mínimas:
