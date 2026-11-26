@@ -15,7 +15,7 @@ jobs:
   build:
     permissions:
       contents: read
-    uses: eu-joao/devops/.github/workflows/ci-node.yml@main
+    uses: eu-joao/devops/.github/workflows/ci-node.yml@97376c28ea183b39b0a80f10a3436aa5d3298889
     with:
       node_version: ${{ inputs.node_version }}
       working_directory: ${{ inputs.working_directory }}
