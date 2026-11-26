@@ -27,9 +27,9 @@ jobs:
         run: bats tests/
 
       - name: actionlint
-        uses: reviewdog/action-actionlint@v1
+        uses: docker://rhysd/actionlint:1.7.12
         with:
-          fail_on_error: true
+          args: -color
 
       - name: zizmor
         run: |
