@@ -40,7 +40,7 @@ Copie `templates/callers/ci.yml` para o projeto e ajuste os diretórios. Não é
 
 1. Escolha `mistral-vibe` ou `gemini` no input `agent_provider`.
 2. Configure somente o secret correspondente: `MISTRAL_VIBE_CODE_KEY` ou `GEMINI_API_KEY`.
-3. Para comentários e PRs automatizados, configure também `GH_APP_CLIENT_ID` e `GH_APP_PRIVATE_KEY` de um GitHub App instalado no repositório.
+3. Para comentários e PRs automatizados, configure também `GH_APP_ID` e `GH_APP_PRIVATE_KEY` de um GitHub App instalado no repositório.
 4. Copie apenas os callers de agente que pretende usar.
 
 Sem a chave do provedor, a etapa de agente é ignorada com aviso; o CI convencional continua funcionando. Uma chave presente mas inválida causa falha explícita.
