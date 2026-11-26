@@ -1,54 +1,49 @@
 # devops
 
-Workflows de CI e agentes de IA compartilhados pelos projetos do semestre.
+Workflows reutilizáveis de CI e automações assistidas por IA para projetos acadêmicos e pessoais.
 
-## Sobre
+## Princípios
 
-Este repositório concentra os workflows reutilizáveis do GitHub Actions, os prompts e os scripts usados por todos os projetos. Cada projeto chama um workflow daqui com poucas linhas, em vez de copiar a configuração.
-
-Os agentes de IA rodam como CLI dentro do Actions. Para trocar de agente basta mudar uma variável, porque os workflows só chamam o script `run-agent.sh`.
+- CI funciona independentemente de qualquer agente ou chave de IA.
+- Mistral Vibe é o provedor preferencial; Gemini CLI é a alternativa gratuita.
+- Provedor, autenticação e modo de execução são configurações separadas.
+- Agentes não recebem tokens do GitHub. Ações de publicação usam um GitHub App.
+- Testes automatizados não chamam modelos reais nem consomem cotas.
+- CD será considerado somente depois da estabilização do CI.
 
 ## Estrutura
 
-```
-devops/
-├── .github/workflows/
-│   ├── ci-spring.yml          # build e testes (Spring Boot, Maven)
-│   ├── ci-react.yml           # lint, testes e build (React)
-│   ├── agent-review-pr.yml    # agente comenta no PR
-│   ├── agent-update-deps.yml  # agente atualiza dependências e abre PR
-│   └── agent-triage-issue.yml # agente classifica issues
-├── prompts/
-│   ├── review.md
-│   ├── deps.md
-│   ├── triage.md
-│   └── shared/
-│       └── project-rules.md   # regras comuns a todos os prompts
-├── scripts/
-│   ├── run-agent.sh           # chama o CLI escolhido em modo headless
-│   ├── install-agent.sh       # instala o CLI escolhido
-│   └── open-pr.sh             # branch, commit, push e gh pr create
-├── templates/
-│   ├── callers/               # arquivos para copiar em cada projeto
-│   ├── Dockerfile.spring
-│   ├── Dockerfile.react
-│   └── docker-compose.yml
-├── docs/
-│   ├── adding-a-project.md
-│   ├── secrets.md
-│   └── permissions.md
-├── CONTRIBUTING.md
-└── README.md
+```text
+.github/workflows/
+  ci-node.yml              # CI compartilhado por Vue, React e outros projetos Node
+  ci-spring.yml            # CI para Spring Boot/Maven
+  ci-devops.yml            # testes e análise deste repositório
+  agent-review-pr.yml
+  agent-triage-issue.yml
+  agent-update-deps.yml
+agents/
+  runtime/run-agent.sh
+  providers/{mistral-vibe,gemini}.sh
+  auth/provider-key.sh
+actions/                    # reservado para etapas realmente reutilizáveis
+docs/
+prompts/
+scripts/
+templates/callers/
+tests/
 ```
 
-## Como usar
+## Começar sem agentes
 
-1. Crie o secret `AGENT_API_KEY` no projeto.
-2. Copie os arquivos de `templates/callers/` para `.github/workflows/` do projeto e troque `SEU_USUARIO`.
-3. Abra um PR de teste.
+Copie `templates/callers/ci.yml` para o projeto, ajuste os diretórios e troque `SEU_USUARIO`. Não é necessário criar secrets.
 
-O passo a passo completo está em [docs/adding-a-project.md](./docs/adding-a-project.md).
+## Habilitar agentes
 
-## Contribuindo
+1. Escolha `mistral-vibe` ou `gemini` no input `agent_provider`.
+2. Configure somente o secret correspondente: `MISTRAL_VIBE_CODE_KEY` ou `GEMINI_API_KEY`.
+3. Para comentários e PRs automatizados, configure também `GH_APP_ID` e `GH_APP_PRIVATE_KEY` de um GitHub App instalado no repositório.
+4. Copie apenas os callers de agente que pretende usar.
 
-Regras de branch, commit e Pull Request estão em [CONTRIBUTING.md](./CONTRIBUTING.md).
+Sem a chave do provedor, a etapa de agente é ignorada com aviso; o CI convencional continua funcionando. Uma chave presente mas inválida causa falha explícita.
+
+Consulte [adicionando um projeto](docs/adding-a-project.md), [arquitetura](docs/architecture.md), [secrets](docs/secrets.md) e [permissões](docs/permissions.md).
