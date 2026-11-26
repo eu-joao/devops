@@ -1,26 +1,25 @@
 # Permissões
 
-Os agentes rodam com o mínimo necessário. A regra principal: o agente edita arquivos ou escreve texto, mas nunca recebe o token do GitHub. Quem comenta, comita e abre PR são os workflows e o `open-pr.sh`.
+## Princípio
 
-## Por workflow
+O agente recebe acesso ao workspace e à chave do provedor selecionado. Nunca recebe token GitHub. O token do GitHub App só é criado em etapa posterior, fora do processo do agente.
 
-| Workflow | `contents` | `pull-requests` | `issues` | O agente pode |
-|---|---|---|---|---|
-| `agent-review-pr` | read | write | - | ler o código e usar `git diff`, `git log`, `git show` |
-| `agent-update-deps` | write | write | - | editar arquivos e rodar `npm` e `mvn` |
-| `agent-triage-issue` | read | - | write | ler o código |
-| `ci-spring`, `ci-react` | read | - | - | não há agente |
+| Workflow | Token de checkout | GitHub App | Capacidade |
+|---|---|---|---|
+| `ci-node`, `ci-spring` | contents: read | nenhum | build e testes |
+| `agent-review-pr` | contents: read | pull-requests: write | comentar review |
+| `agent-triage-issue` | contents: read | issues: write | comentar triagem |
+| `agent-update-deps` | contents: read | contents: write, pull-requests: write | abrir PR |
 
-As permissões também precisam ser concedidas no arquivo de chamada do projeto. Um workflow reutilizável nunca recebe mais do que o chamador deu.
+## Regras
 
-## Decisões de segurança
+- Usar `pull_request`, nunca `pull_request_target`, para executar código de PR.
+- Checkout com `persist-credentials: false`.
+- Secrets de provedor e GitHub App não devem ser expostos a forks.
+- O GitHub App token é gerado somente após o agente concluir.
+- Não conceder `contents: write` ao `GITHUB_TOKEN` do job do agente.
+- Conteúdo de issues e PRs é dado não confiável, nunca instrução de sistema.
 
-- Os checkouts usam `persist-credentials: false`. O token só entra no `open-pr.sh`, depois que o agente terminou.
-- O review usa o evento `pull_request`, nunca `pull_request_target`. Assim o código de um fork não roda com acesso a secrets.
-- O texto de PRs e issues é tratado como dado. As regras em `prompts/shared/project-rules.md` mandam o agente ignorar pedidos escondidos nesses textos, mas isso não é garantia. A proteção de verdade é o agente ter poucas permissões.
-- No Claude Code, a lista `--allowedTools` do `run-agent.sh` limita os comandos que o agente pode rodar. Nos outros CLIs o controle é diferente e deve ser conferido na documentação de cada um.
+## Execução sem agente
 
-## Limitações conhecidas
-
-- PRs abertos com o `GITHUB_TOKEN` não disparam outros workflows. Por isso o CI não roda sozinho no PR de dependências. Para rodar, feche e reabra o PR, ou use um token pessoal no lugar do `GITHUB_TOKEN`.
-- `npm` e `mvn` executam scripts do próprio projeto. Rode o workflow de dependências só em repositórios em que você confia no código.
+Workflows de CI não declaram nem recebem secrets de IA. Callers de agentes são arquivos independentes e opcionais.
