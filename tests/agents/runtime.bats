@@ -32,3 +32,8 @@ setup() {
   [ "$status" -ne 0 ]
   [[ "$output" == *"AGENT_MODE deve ser readonly ou edit"* ]]
 }
+
+@test "não exporta a chave intermediária para processos filhos" {
+  run env AGENT_PROVIDER=mistral-vibe MISTRAL_VIBE_CODE_KEY=test-key bash -c 'source "$1"; env | grep "^AGENT_PROVIDER_KEY="' _ "$ROOT/agents/auth/provider-key.sh"
+  [ "$status" -ne 0 ]
+}
