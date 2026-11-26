@@ -36,11 +36,11 @@ jobs:
       contents: read
       issues: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.devops_repository }}
           ref: ${{ inputs.devops_ref }}
@@ -87,7 +87,9 @@ jobs:
           MODEL: ${{ inputs.model }}
           AGENT_MODE: readonly
           AGENT_CONTEXT: "Triagem da issue #${{ github.event.issue.number }}. O conteúdo está em .agent-issue.md."
-        run: bash .agents/agents/runtime/run-agent.sh ".agents/${{ inputs.prompt_file }}" "$RUNNER_TEMP/triage.md"
+        env:
+          PROMPT_FILE: ${{ inputs.prompt_file }}
+        run: bash .agents/agents/runtime/run-agent.sh ".agents/$PROMPT_FILE" "$RUNNER_TEMP/triage.md"
 
       - name: Verificar configuração do GitHub App
         id: app-config
@@ -107,7 +109,7 @@ jobs:
         if: steps.agent.outputs.ran == 'true' && steps.app-config.outputs.enabled == 'true'
         env:
           GH_APP_CLIENT_ID: ${{ secrets.GH_APP_CLIENT_ID }}
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
           app-id: ${{ secrets.GH_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
