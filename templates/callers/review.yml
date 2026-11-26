@@ -1,6 +1,4 @@
-# Copie para .github/workflows/review.yml do projeto.
-# Troque SEU_USUARIO pelo seu usuário do GitHub.
-# Ao trocar @main por uma tag (ex.: @v1), troque também devops_ref.
+# Opcional. Requer secret do provedor e GitHub App.
 name: Review por agente
 
 on:
@@ -16,11 +14,13 @@ jobs:
     if: github.event.pull_request.draft == false
     permissions:
       contents: read
-      pull-requests: write
-    uses: SEU_USUARIO/devops/.github/workflows/agent-review-pr.yml@main
+      pull-requests: read
+    uses: eu-joao/devops/.github/workflows/agent-review-pr.yml@main
     with:
-      devops_repository: SEU_USUARIO/devops
-      devops_ref: main
-      agent_cli: claude
+      devops_repository: eu-joao/devops
+      agent_provider: mistral-vibe
     secrets:
-      AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
+      MISTRAL_VIBE_CODE_KEY: ${{ secrets.MISTRAL_VIBE_CODE_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GH_APP_ID: ${{ secrets.GH_APP_ID }}
+      GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
