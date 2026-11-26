@@ -87,7 +87,6 @@ jobs:
           MODEL: ${{ inputs.model }}
           AGENT_MODE: readonly
           AGENT_CONTEXT: "Triagem da issue #${{ github.event.issue.number }}. O conteúdo está em .agent-issue.md."
-        env:
           PROMPT_FILE: ${{ inputs.prompt_file }}
         run: bash .agents/agents/runtime/run-agent.sh ".agents/$PROMPT_FILE" "$RUNNER_TEMP/triage.md"
 
