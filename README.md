@@ -25,7 +25,6 @@ agents/
   runtime/run-agent.sh
   providers/{mistral-vibe,gemini}.sh
   auth/provider-key.sh
-actions/                    # reservado para etapas realmente reutilizáveis
 docs/
 prompts/
 scripts/
