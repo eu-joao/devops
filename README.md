@@ -34,7 +34,32 @@ tests/
 
 ## Começar sem agentes
 
-Copie `templates/callers/ci.yml` para o projeto e ajuste os diretórios. Não é necessário criar secrets.
+Os templates de CI são **Reusable Workflows** hospedados neste repositório. Não copie a implementação dos workflows para os projetos consumidores: crie apenas um pequeno workflow chamador em `.github/workflows/`, que referencia o workflow central com `uses`.
+
+Exemplo para um projeto Node/Vue:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-node.yml@main
+    with:
+      node_version: "22"
+      working_directory: "."
+      package_manager: npm
+```
+
+Para Spring Boot/Maven, use `ci-spring.yml` e informe `java_version` e `working_directory`. Projetos com backend e frontend podem chamar os dois workflows em jobs separados. Os exemplos completos estão em [templates/callers/](templates/callers/).
+
+O arquivo chamador continua necessário porque cada repositório define seus próprios eventos, branches e parâmetros. A implementação do CI, porém, permanece centralizada aqui. Não é necessário criar secrets para usar CI.
 
 ## Habilitar agentes
 
