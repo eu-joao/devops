@@ -4,18 +4,23 @@ on:
   workflow_call:
     inputs:
       devops_repository:
+        description: Repositório que contém os workflows, scripts, adaptadores e prompts compartilhados.
         type: string
         required: true
       devops_ref:
+        description: Branch, tag ou SHA do repositório compartilhado que será utilizado.
         type: string
         default: main
       agent_provider:
+        description: Provedor de IA que executará a tarefa: mistral-vibe ou gemini.
         type: string
         default: mistral-vibe
       model:
+        description: Identificador opcional do modelo a ser utilizado pelo provedor escolhido.
         type: string
         default: ""
       prompt_file:
+        description: Caminho do arquivo de prompt, relativo à raiz do repositório compartilhado.
         type: string
         default: prompts/review.md
     secrets:
