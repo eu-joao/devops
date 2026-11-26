@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PROVIDER="${AGENT_PROVIDER:-${AGENT_CLI:-mistral-vibe}}"
+PROVIDER="${AGENT_PROVIDER:-mistral-vibe}"
 case "$PROVIDER" in
   mistral-vibe)
     pipx install --force mistral-vibe
