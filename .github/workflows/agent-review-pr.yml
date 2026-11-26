@@ -82,7 +82,6 @@ jobs:
           MODEL: ${{ inputs.model }}
           AGENT_MODE: readonly
           AGENT_CONTEXT: "Pull Request #${{ github.event.pull_request.number }}. Analise git diff origin/${{ github.base_ref }}...HEAD."
-        env:
           PROMPT_FILE: ${{ inputs.prompt_file }}
         run: bash .agents/agents/runtime/run-agent.sh ".agents/$PROMPT_FILE" "$RUNNER_TEMP/review.md"
 
