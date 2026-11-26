@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck source=../auth/provider-key.sh
 set -euo pipefail
 PROMPT_FILE="${1:?uso: run-agent.sh <prompt> [arquivo-saida]}"
 OUTPUT_FILE="${2:-}"
@@ -9,6 +8,7 @@ MODE="${AGENT_MODE:-readonly}"
 export AGENT_PROVIDER="$PROVIDER" AGENT_MODE="$MODE"
 export AGENT_TIMEOUT="${AGENT_TIMEOUT:-900}" AGENT_MAX_TURNS="${AGENT_MAX_TURNS:-12}"
 if [[ "$MODE" != readonly && "$MODE" != edit ]]; then echo "AGENT_MODE deve ser readonly ou edit" >&2; exit 2; fi
+# shellcheck disable=SC1091
 source "$ROOT/agents/auth/provider-key.sh"
 if [ -z "$AGENT_PROVIDER_KEY" ]; then
   echo "::warning::Chave do provedor '$PROVIDER' ausente; execução de IA ignorada."
