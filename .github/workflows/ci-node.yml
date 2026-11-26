@@ -16,12 +16,15 @@ on:
         type: string
         default: npm
       run_lint:
+        description: Define se a etapa de lint será executada quando houver um script lint no package.json.
         type: boolean
         default: true
       run_tests:
+        description: Define se a etapa de testes será executada quando houver um script test no package.json.
         type: boolean
         default: true
       run_build:
+        description: Define se a etapa de build será executada quando houver um script build no package.json.
         type: boolean
         default: true
 
