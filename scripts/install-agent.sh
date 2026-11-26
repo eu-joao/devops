@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Instala somente o CLI escolhido.
 set -euo pipefail
 PROVIDER="${AGENT_PROVIDER:-${AGENT_CLI:-mistral-vibe}}"
 case "$PROVIDER" in
   mistral-vibe)
-    python -m pip install --user --upgrade mistral-vibe
+    pipx install --force mistral-vibe
     ;;
   gemini)
     npm install -g @google/gemini-cli
