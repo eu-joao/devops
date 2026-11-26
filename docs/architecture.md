@@ -48,4 +48,4 @@ Mistral Vibe é o padrão recomendado. A disponibilidade e os limites gratuitos 
 
 ## Evolução
 
-Não criar abstrações ou composite actions para comandos triviais. Extrair uma action apenas quando houver lógica estável repetida em múltiplos workflows. Fixar versões estáveis depois de validar a implementação; durante desenvolvimento os callers podem usar `@main`.
+Não criar abstrações ou composite actions para comandos triviais. Extrair uma action apenas quando houver lógica estável repetida em múltiplos workflows. Actions externas são fixadas por SHA completo; atualizações devem ocorrer em PR e passar pelo CI. Os callers dos workflows deste repositório podem usar `@main` durante desenvolvimento.
