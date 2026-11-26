@@ -3,7 +3,7 @@ set -euo pipefail
 PROMPT_FILE="${1:?uso: run-agent.sh <prompt> [arquivo-saida]}"
 OUTPUT_FILE="${2:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PROVIDER="${AGENT_PROVIDER:-mistral-vibe}"
+PROVIDER="${AGENT_PROVIDER:-${AGENT_CLI:-mistral-vibe}}"
 MODE="${AGENT_MODE:-readonly}"
 export AGENT_PROVIDER="$PROVIDER" AGENT_MODE="$MODE"
 export AGENT_TIMEOUT="${AGENT_TIMEOUT:-900}" AGENT_MAX_TURNS="${AGENT_MAX_TURNS:-12}"
