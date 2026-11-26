@@ -1,23 +1,22 @@
-# Copie para .github/workflows/deps.yml do projeto.
-# Troque SEU_USUARIO pelo seu usuário do GitHub.
-# Ao trocar @main por uma tag (ex.: @v1), troque também devops_ref.
-# Em Settings > Actions > General, ative "Allow GitHub Actions to create and approve pull requests".
+# Opcional. Requer secret do provedor e GitHub App.
 name: Atualizar dependências
 
 on:
   schedule:
-    - cron: "0 9 * * 1" # segunda-feira, 9h UTC
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
   deps:
     permissions:
-      contents: write
-      pull-requests: write
-    uses: SEU_USUARIO/devops/.github/workflows/agent-update-deps.yml@main
+      contents: read
+      pull-requests: read
+    uses: eu-joao/devops/.github/workflows/agent-update-deps.yml@main
     with:
-      devops_repository: SEU_USUARIO/devops
-      devops_ref: main
-      agent_cli: claude
+      devops_repository: eu-joao/devops
+      agent_provider: mistral-vibe
     secrets:
-      AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
+      MISTRAL_VIBE_CODE_KEY: ${{ secrets.MISTRAL_VIBE_CODE_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GH_APP_ID: ${{ secrets.GH_APP_ID }}
+      GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
