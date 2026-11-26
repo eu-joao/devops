@@ -109,7 +109,7 @@ jobs:
           GH_APP_CLIENT_ID: ${{ secrets.GH_APP_CLIENT_ID }}
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.GH_APP_CLIENT_ID }}
+          app-id: ${{ secrets.GH_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           permission-issues: write
 
