@@ -67,7 +67,27 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
 
+      - name: Verificar chave do provedor
+        id: provider-key
+        env:
+          AGENT_PROVIDER: ${{ inputs.agent_provider }}
+          MISTRAL_VIBE_CODE_KEY: ${{ secrets.MISTRAL_VIBE_CODE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          case "$AGENT_PROVIDER" in
+            mistral-vibe) KEY="$MISTRAL_VIBE_CODE_KEY" ;;
+            gemini) KEY="$GEMINI_API_KEY" ;;
+            *) echo "Provedor inválido: $AGENT_PROVIDER" >&2; exit 2 ;;
+          esac
+          if [ -n "$KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Chave ausente; execução do agente será ignorada."
+          fi
+
       - name: Instalar CLI
+        if: steps.provider-key.outputs.configured == 'true'
         env:
           AGENT_PROVIDER: ${{ inputs.agent_provider }}
         run: bash .agents/scripts/install-agent.sh
