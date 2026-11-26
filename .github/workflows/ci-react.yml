@@ -13,7 +13,9 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/ci-node.yml
+    permissions:
+      contents: read
+    uses: $/.github/workflows/ci-node.yml
     with:
       node_version: ${{ inputs.node_version }}
       working_directory: ${{ inputs.working_directory }}
