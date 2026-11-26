@@ -35,7 +35,7 @@ tests/
 
 ## Começar sem agentes
 
-Copie `templates/callers/ci.yml` para o projeto, ajuste os diretórios e troque `SEU_USUARIO`. Não é necessário criar secrets.
+Copie `templates/callers/ci.yml` para o projeto e ajuste os diretórios. Não é necessário criar secrets.
 
 ## Habilitar agentes
 
