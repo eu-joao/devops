@@ -111,7 +111,7 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-markdownlint.yml@main
 ```
 
-O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, uma configuração e lockfile compatíveis com o gerenciador escolhido.
+O workflow de Commitlint instala a ferramenta diretamente no ambiente da CI e usa a configuração do projeto consumidor. Não exige `package.json`, lockfile ou dependências Node no repositório; basta manter um arquivo de configuração do Commitlint, como `commitlint.config.mjs`.
 
 O workflow de Markdownlint verifica `**/*.md` por padrão e desativa `MD013` (comprimento de linha). Projetos podem sobrescrever esse padrão ou configurar outras regras em `.markdownlint-cli2.yaml` ou `.markdownlint.yaml`. Use o input `globs` para restringir ou ampliar os arquivos verificados.
 
