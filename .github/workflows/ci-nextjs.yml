@@ -1,0 +1,115 @@
+name: CI - Web (Next.js)
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Versão do Node.js usada pelo projeto
+        type: string
+        default: "24"
+      working_directory:
+        description: Diretório do aplicativo Next.js
+        type: string
+        default: "web"
+      package_manager:
+        description: Gerenciador de pacotes (npm, pnpm ou yarn)
+        type: string
+        default: npm
+      run_lint:
+        description: Executa o script lint do package.json
+        type: boolean
+        default: true
+      run_typecheck:
+        description: Executa Next.js typegen e TypeScript
+        type: boolean
+        default: true
+      run_build:
+        description: Executa o build de produção
+        type: boolean
+        default: true
+      run_tests:
+        description: Executa o script test quando existir
+        type: boolean
+        default: true
+
+jobs:
+  web:
+    name: Validar aplicativo Next.js
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: |
+            ${{ inputs.working_directory }}/package-lock.json
+            ${{ inputs.working_directory }}/pnpm-lock.yaml
+            ${{ inputs.working_directory }}/yarn.lock
+
+      - name: Ativar pnpm
+        if: inputs.package_manager == 'pnpm'
+        run: corepack enable
+
+      - name: Instalar dependências
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm ci ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            yarn) corepack yarn install --immutable ;;
+            *) echo "package_manager inválido: $PACKAGE_MANAGER" >&2; exit 1 ;;
+          esac
+
+      - name: Lint
+        if: inputs.run_lint
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm run lint ;;
+            pnpm) pnpm run lint ;;
+            yarn) corepack yarn run lint ;;
+          esac
+
+      - name: Gerar tipos do Next.js e verificar TypeScript
+        if: inputs.run_typecheck
+        run: |
+          npx next typegen
+          npx tsc --noEmit
+
+      - name: Build
+        if: inputs.run_build
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm run build ;;
+            pnpm) pnpm run build ;;
+            yarn) corepack yarn run build ;;
+          esac
+
+      - name: Testes
+        if: inputs.run_tests
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          if ! node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)"; then
+            echo "Script test ausente; etapa ignorada."
+            exit 0
+          fi
+          case "$PACKAGE_MANAGER" in
+            npm) npm test ;;
+            pnpm) pnpm test ;;
+            yarn) corepack yarn test ;;
+          esac

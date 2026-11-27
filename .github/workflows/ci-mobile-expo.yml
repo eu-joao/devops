@@ -1,0 +1,103 @@
+name: CI - Mobile (Expo / React Native)
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Versão do Node.js usada pelo projeto
+        type: string
+        default: "24"
+      working_directory:
+        description: Diretório do aplicativo Expo
+        type: string
+        default: "mobile"
+      package_manager:
+        description: Gerenciador de pacotes (npm, pnpm ou yarn)
+        type: string
+        default: npm
+      run_prettier:
+        description: Executa Prettier quando habilitado
+        type: boolean
+        default: true
+      run_lint:
+        description: Executa o script lint do package.json quando habilitado
+        type: boolean
+        default: true
+      run_typecheck:
+        description: Executa TypeScript com --noEmit
+        type: boolean
+        default: true
+      run_expo_doctor:
+        description: Executa Expo Doctor para verificar compatibilidade do projeto
+        type: boolean
+        default: true
+      run_export:
+        description: Gera os bundles de produção para iOS, Android e Web
+        type: boolean
+        default: true
+
+jobs:
+  mobile:
+    name: Validar aplicativo Expo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: |
+            ${{ inputs.working_directory }}/package-lock.json
+            ${{ inputs.working_directory }}/pnpm-lock.yaml
+            ${{ inputs.working_directory }}/yarn.lock
+
+      - name: Ativar pnpm
+        if: inputs.package_manager == 'pnpm'
+        run: corepack enable
+
+      - name: Instalar dependências
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm ci ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            yarn) corepack yarn install --immutable ;;
+            *) echo "package_manager inválido: $PACKAGE_MANAGER" >&2; exit 1 ;;
+          esac
+
+      - name: Formatação
+        if: inputs.run_prettier
+        run: npx prettier --check .
+
+      - name: Lint
+        if: inputs.run_lint
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm run lint ;;
+            pnpm) pnpm run lint ;;
+            yarn) corepack yarn run lint ;;
+          esac
+
+      - name: TypeScript
+        if: inputs.run_typecheck
+        run: npx tsc --noEmit
+
+      - name: Expo Doctor
+        if: inputs.run_expo_doctor
+        run: npx expo-doctor
+
+      - name: Exportar bundles de produção
+        if: inputs.run_export
+        run: npx expo export --platform all --output-dir /tmp/expo-export

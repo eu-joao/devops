@@ -1,43 +1,52 @@
 # devops
 
-Workflows reutilizáveis de CI e automações assistidas por IA para projetos acadêmicos e pessoais.
+Workflows reutilizáveis de CI, instruções para agentes e skills compartilhadas para projetos acadêmicos e pessoais.
 
 ## Princípios
 
-- A implementação da CI fica centralizada neste repositório; os consumidores mantêm apenas arquivos pequenos que selecionam os workflows e definem seus eventos.
+- A implementação da CI fica centralizada neste repositório; consumidores mantêm apenas arquivos chamadores pequenos.
+- Cada stack possui um workflow adequado. Projetos só chamam as verificações que realmente usam.
 - CI determinística funciona independentemente de agentes ou chaves de IA.
-- Mistral Vibe é o provedor preferencial; Gemini CLI é a alternativa.
 - Provedor, autenticação e modo de execução são configurações separadas.
 - Agentes não recebem tokens do GitHub. Ações de publicação usam um GitHub App.
 - Testes automatizados não chamam modelos reais nem consomem cotas.
+- Templates e skills ficam centralizados como referência; distribuição para outros repositórios será tratada separadamente.
 - CD será considerado somente depois da estabilização do CI.
 
 ## Estrutura
 
 ```text
-.github/workflows/
-  ci-node.yml              # CI compartilhada por Vue, React e outros projetos Node
-  ci-spring.yml            # CI para Spring Boot/Maven
-  ci-devops.yml            # testes e análise deste repositório
-  agent-review-pr.yml
-  agent-triage-issue.yml
-  agent-update-deps.yml
+.github/
+  ISSUE_TEMPLATE/
+  workflows/
+    ci-node.yml
+    ci-mobile-expo.yml
+    ci-nextjs.yml
+    ci-spring.yml
+    ci-pr-title.yml
+    ci-commitlint.yml
+    ci-devops.yml
+    agent-review-pr.yml
+    agent-triage-issue.yml
+    agent-update-deps.yml
 agents/
-  runtime/run-agent.sh
-  providers/{mistral-vibe,gemini}.sh
-  auth/provider-key.sh
+  runtime/
+  providers/
+  auth/
+  skills/
 docs/
 prompts/
 scripts/
 templates/                 # templates de container
 tests/
+AGENTS.md
 ```
 
 ## Usar a CI em outro repositório
 
-A implementação dos workflows fica neste repositório e é consumida por meio de [Reusable Workflows do GitHub Actions](https://docs.github.com/actions/sharing-automations/reusing-workflows). No projeto consumidor, mantenha somente um arquivo em `.github/workflows/` que define os eventos e aponta para o workflow central com `uses`. Não copie scripts, etapas ou arquivos de implementação.
+A implementação dos workflows fica neste repositório e é consumida por meio de [Reusable Workflows do GitHub Actions](https://docs.github.com/actions/sharing-automations/reusing-workflows). No projeto consumidor, mantenha somente um arquivo em `.github/workflows/` que define os eventos e aponta para o workflow central com `uses`.
 
-Para Vue, React ou outros projetos Node, por exemplo:
+Exemplo para Node:
 
 ```yaml
 name: CI
@@ -58,13 +67,17 @@ jobs:
       package_manager: npm
 ```
 
-Para Spring Boot/Maven, aponte para `ci-spring.yml` e, se necessário, informe `java_version` e `working_directory`. Um repositório com frontend e backend pode declarar um job para cada workflow.
+Para Expo/React Native, Next.js ou Spring Boot, use respectivamente `ci-mobile-expo.yml`, `ci-nextjs.yml` ou `ci-spring.yml`. Workflows para título de PR e Commitlint são opcionais e independentes.
 
-Os arquivos locais definem quando a CI roda e quais parâmetros são usados; instalação de ferramentas, execução de lint, testes e build permanecem gerenciados pelo repositório central. Os inputs disponíveis estão documentados nos próprios workflows.
+Consulte o [guia de integração](docs/adding-a-project.md) para exemplos e inputs.
 
-Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Para execuções reproduzíveis, prefira uma tag estável ou SHA completo. Não são necessários secrets para usar os workflows de CI.
+Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Para execuções reproduzíveis, prefira uma tag estável ou SHA completo. Não são necessários secrets para usar os workflows determinísticos.
 
-Consulte o [guia de integração](docs/adding-a-project.md).
+## Templates e skills
+
+Os templates de issue e PR ficam em `.github/ISSUE_TEMPLATE/` e `.github/pull_request_template.md`. As skills compartilhadas estão em [`agents/skills/`](agents/skills/README.md). Consulte [AGENTS.md](AGENTS.md) para instruções gerais destinadas a agentes.
+
+Esses arquivos são mantidos neste repositório. A instalação ou sincronização automática para projetos consumidores não está incluída.
 
 ## Habilitar agentes (opcional)
 
@@ -73,7 +86,7 @@ Os workflows de agentes também são reutilizáveis. O repositório consumidor d
 1. Escolha `mistral-vibe` ou `gemini` no input `agent_provider`.
 2. Configure somente o secret correspondente: `MISTRAL_VIBE_CODE_KEY` ou `GEMINI_API_KEY`.
 3. Para comentários e PRs automatizados, configure também `GH_APP_ID` e `GH_APP_PRIVATE_KEY` de um GitHub App instalado no repositório.
-4. Ao chamar os workflows de agentes, informe `devops_repository: eu-joao/devops` e a referência desejada em `devops_ref`. Encaminhe os secrets necessários ao workflow reutilizável.
+4. Informe `devops_repository: eu-joao/devops` e a referência desejada em `devops_ref`.
 
 Sem a chave do provedor, a execução do agente é ignorada com aviso; a CI determinística continua funcionando. Uma chave presente mas inválida causa falha explícita.
 

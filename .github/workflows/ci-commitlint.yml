@@ -1,0 +1,69 @@
+name: CI - Commitlint
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Versão do Node.js usada para executar Commitlint
+        type: string
+        default: "24"
+      working_directory:
+        description: Diretório com package.json, lockfile e configuração do Commitlint
+        type: string
+        default: "."
+      package_manager:
+        description: Gerenciador de pacotes (npm, pnpm ou yarn)
+        type: string
+        default: npm
+
+jobs:
+  commitlint:
+    name: Validar mensagens de commit
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: |
+            ${{ inputs.working_directory }}/package-lock.json
+            ${{ inputs.working_directory }}/pnpm-lock.yaml
+            ${{ inputs.working_directory }}/yarn.lock
+
+      - name: Ativar pnpm
+        if: inputs.package_manager == 'pnpm'
+        run: corepack enable
+
+      - name: Instalar dependências
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm ci ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            yarn) corepack yarn install --immutable ;;
+            *) echo "package_manager inválido: $PACKAGE_MANAGER" >&2; exit 1 ;;
+          esac
+
+      - name: Verificar commits do PR
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npx commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
+            pnpm) pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
+            yarn) corepack yarn commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
+          esac
