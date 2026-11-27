@@ -118,11 +118,9 @@ Os workflows Node especializados aceitam `npm`, `pnpm` ou `yarn`, usam o lockfil
 
 Use uma versão de Node compatível com o projeto. Os valores padrão estão descritos nos próprios workflows.
 
-## 3. Templates e skills
+## 3. Templates de contribuição
 
-Os templates de issue e pull request ficam em `.github/ISSUE_TEMPLATE/` e `.github/pull_request_template.md`. As skills compartilhadas ficam em `agents/skills/`.
-
-Esses arquivos são mantidos neste repositório como referência central. A distribuição ou sincronização automática para projetos consumidores não faz parte deste fluxo.
+O template de issue fica em `.github/ISSUE_TEMPLATE/` e o de pull request em `.github/pull_request_template.md`.
 
 ## 4. Habilite agentes (opcional)
 
