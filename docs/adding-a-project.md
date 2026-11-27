@@ -25,7 +25,6 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
       node_version: "22"
-      working_directory: "."
       package_manager: npm
 ```
 
@@ -41,7 +40,6 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-mobile-expo.yml@main
     with:
       node_version: "24"
-      working_directory: "mobile"
       package_manager: npm
 ```
 
@@ -59,7 +57,6 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-nextjs.yml@main
     with:
       node_version: "24"
-      working_directory: "web"
       package_manager: npm
 ```
 
@@ -80,6 +77,22 @@ jobs:
       working_directory: "backend"
 ```
 
+### Projetos com mais de uma stack ou monorepos
+
+Declare um job para cada workflow aplicável. Cada job pode apontar para seu próprio diretório de trabalho. Informe `working_directory` somente quando a aplicação não estiver na raiz do repositório.
+
+Por exemplo, para um frontend dentro de `frontend/`:
+
+```yaml
+jobs:
+  web:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-nextjs.yml@main
+    with:
+      working_directory: frontend
+```
+
 ### Título de PR e mensagens de commit
 
 Essas verificações são workflows separados para que cada projeto escolha se deseja adotá-las:
@@ -95,15 +108,9 @@ jobs:
     permissions:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-commitlint.yml@main
-    with:
-      working_directory: "."
 ```
 
 O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, uma configuração e lockfile compatíveis com o gerenciador escolhido.
-
-### Projetos com mais de uma stack
-
-Declare um job para cada workflow aplicável. Cada um pode apontar para seu próprio diretório de trabalho. Não execute workflows especializados para stacks que o projeto não utiliza.
 
 ## 2. Configuração de pacotes
 
