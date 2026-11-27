@@ -1,14 +1,14 @@
 # Adicionando um projeto
 
-## 1. Escolha o workflow
+## 1. Escolha os workflows
 
-A implementação da CI é mantida em `eu-joao/devops`. No projeto consumidor, crie apenas um arquivo de configuração em `.github/workflows/` que define os eventos e referencia o workflow reutilizável adequado com `uses`.
+A implementação da CI é mantida em `eu-joao/devops`. No projeto consumidor, crie somente arquivos pequenos em `.github/workflows/` que definem os eventos e chamam os workflows centrais com `uses`.
 
-Não copie workflows de implementação, scripts, etapas de instalação ou templates deste repositório.
+Não copie etapas, scripts ou arquivos de implementação para o projeto consumidor.
 
 ### Vue, React ou outro projeto Node
 
-Crie, por exemplo, `.github/workflows/ci.yml`:
+Use `ci-node.yml` para verificações genéricas de Node:
 
 ```yaml
 name: CI
@@ -25,53 +25,115 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
       node_version: "22"
-      working_directory: "."
       package_manager: npm
 ```
 
-O workflow Node também aceita os inputs `run_lint`, `run_tests` e `run_build`, que permitem habilitar ou desabilitar essas etapas. Cada etapa é executada somente quando habilitada e quando o script correspondente existe no `package.json`.
+### Mobile com Expo / React Native
 
-### Spring Boot/Maven
-
-Aponte o job para `ci-spring.yml`:
+Use `ci-mobile-expo.yml`. Ele instala dependências e pode executar Prettier, lint, TypeScript, Expo Doctor e exportação de bundles para iOS, Android e Web.
 
 ```yaml
 jobs:
-  ci:
+  mobile:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-mobile-expo.yml@main
+    with:
+      node_version: "24"
+      package_manager: npm
+```
+
+As etapas podem ser desligadas pelos inputs `run_prettier`, `run_lint`, `run_typecheck`, `run_expo_doctor` e `run_export` quando o projeto não usar a verificação correspondente.
+
+### Web com Next.js
+
+Use `ci-nextjs.yml`:
+
+```yaml
+jobs:
+  web:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-nextjs.yml@main
+    with:
+      node_version: "24"
+      package_manager: npm
+```
+
+O workflow executa lint, Next.js typegen, TypeScript, build e, quando houver script `test`, testes. Os inputs `run_lint`, `run_typecheck`, `run_build` e `run_tests` controlam essas etapas.
+
+### Spring Boot / Maven
+
+Use `ci-spring.yml`:
+
+```yaml
+jobs:
+  backend:
     permissions:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-spring.yml@main
     with:
       java_version: "21"
-      working_directory: "."
+      working_directory: "backend"
 ```
 
-Se frontend e backend estiverem em diretórios independentes, declare um job para cada workflow e informe o respectivo `working_directory`.
+### Projetos com mais de uma stack ou monorepos
 
-Os eventos e branches são definidos no arquivo local. O workflow central executa instalação, lint, testes e build, conforme a stack e os inputs. Os inputs e seus valores padrão estão descritos nos próprios arquivos de workflow.
+Declare um job para cada workflow aplicável. Cada job pode apontar para seu próprio diretório de trabalho. Informe `working_directory` somente quando a aplicação não estiver na raiz do repositório.
 
-Não é necessário configurar secrets, GitHub App ou agente para usar a CI determinística.
+Por exemplo, para um frontend dentro de `frontend/`:
 
-## 2. (Opcional) Habilite agentes
+```yaml
+jobs:
+  web:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-nextjs.yml@main
+    with:
+      working_directory: frontend
+```
 
-Os workflows de agentes também são reutilizáveis. No repositório consumidor, crie um arquivo pequeno em `.github/workflows/` para o evento desejado e aponte para um dos workflows centrais:
+### Título de PR e mensagens de commit
+
+Essas verificações são workflows separados para que cada projeto escolha se deseja adotá-las:
+
+```yaml
+jobs:
+  pr-title:
+    permissions:
+      pull-requests: read
+    uses: eu-joao/devops/.github/workflows/ci-pr-title.yml@main
+
+  commitlint:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-commitlint.yml@main
+```
+
+O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, uma configuração e lockfile compatíveis com o gerenciador escolhido.
+
+## 2. Configuração de pacotes
+
+Os workflows Node especializados aceitam `npm`, `pnpm` ou `yarn`, usam o lockfile do diretório indicado e instalam dependências em modo imutável.
+
+Use uma versão de Node compatível com o projeto. Os valores padrão estão descritos nos próprios workflows.
+
+## 3. Templates de contribuição
+
+O template de issue fica em `.github/ISSUE_TEMPLATE/` e o de pull request em `.github/pull_request_template.md`.
+
+## 4. Habilite agentes (opcional)
+
+Os workflows de agentes também são reutilizáveis. No repositório consumidor, crie um arquivo pequeno para o evento desejado e aponte para um dos workflows centrais:
 
 - `agent-review-pr.yml`: revisão de pull requests.
 - `agent-triage-issue.yml`: triagem de issues.
 - `agent-update-deps.yml`: atualização de dependências.
 
-Informe o input obrigatório `devops_repository: eu-joao/devops`. Use `devops_ref` para selecionar a branch, tag ou SHA do repositório compartilhado. Configure o `agent_provider` como `mistral-vibe` ou `gemini` e encaminhe os secrets necessários ao workflow reutilizável. Consulte [secrets.md](secrets.md) e [permissions.md](permissions.md).
+Informe o input obrigatório `devops_repository: eu-joao/devops`. Use `devops_ref` para selecionar a branch, tag ou SHA do repositório compartilhado. Configure `agent_provider` e encaminhe os secrets necessários. Consulte [secrets.md](secrets.md) e [permissions.md](permissions.md).
 
-Sem a chave do provedor selecionado, o agente é ignorado com aviso. A CI determinística não depende dessas credenciais.
-
-## 3. (Opcional) Configure o GitHub App
-
-Para comentários e PRs automáticos, crie um GitHub App, instale-o no projeto e configure `GH_APP_ID` e `GH_APP_PRIVATE_KEY`. Conceda somente as permissões necessárias à automação habilitada. Consulte [secrets.md](secrets.md).
-
-## 4. Valide a integração
-
-Abra um pull request ou faça um push correspondente aos eventos definidos no arquivo local e confirme que o workflow central foi executado. Habilite e valide agentes separadamente. Não execute automações de edição em repositórios cujo código ou scripts não sejam confiáveis.
+A CI determinística não depende de secrets de IA nem de GitHub App.
 
 ## 5. Fixe uma versão
 
-Durante o desenvolvimento, `@main` acompanha as alterações mais recentes deste repositório. Depois de validar uma versão estável, prefira uma tag e atualize a referência no arquivo local. Para máxima previsibilidade, use um SHA completo.
+Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Depois de validar uma versão estável, prefira uma tag ou SHA completo para execuções reproduzíveis.
