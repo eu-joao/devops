@@ -8,7 +8,7 @@ on:
         type: string
         default: "24"
       working_directory:
-        description: Diretório do aplicativo Next.js (padrão: raiz do repositório)
+        description: "Diretório do aplicativo Next.js (padrão: raiz do repositório)"
         type: string
         default: "."
       package_manager:
