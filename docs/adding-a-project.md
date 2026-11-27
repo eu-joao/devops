@@ -24,7 +24,6 @@ jobs:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
-      node_version: "22"
       package_manager: npm
 ```
 
@@ -39,7 +38,6 @@ jobs:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-mobile-expo.yml@main
     with:
-      node_version: "24"
       package_manager: npm
 ```
 
@@ -73,7 +71,6 @@ jobs:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-spring.yml@main
     with:
-      java_version: "21"
       working_directory: "backend"
 ```
 
@@ -116,7 +113,7 @@ O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, u
 
 Os workflows Node especializados aceitam `npm`, `pnpm` ou `yarn`, usam o lockfile do diretório indicado e instalam dependências em modo imutável.
 
-Use uma versão de Node compatível com o projeto. Os valores padrão estão descritos nos próprios workflows.
+Todos os workflows compartilham Node.js 24 e Java Temurin 17 como padrões. Para um projeto que precise de outra versão, informe `node_version` ou `java_version` no bloco `with` do workflow consumidor. Não é necessário alterar o workflow central.
 
 ## 3. Templates de contribuição
 
@@ -136,4 +133,4 @@ A CI determinística não depende de secrets de IA nem de GitHub App.
 
 ## 5. Fixe uma versão
 
-Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Depois de validar uma versão estável, prefira uma tag ou SHA completo para execuções reproduzíveis.
+Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Os padrões de runtime são resolvidos pelo workflow compartilhado `runtime-versions.yml`; ao fixar os workflows centrais em uma tag ou SHA, mantenha também a referência desse resolvedor alinhada à mesma versão estável. Depois de validar uma versão estável, prefira uma tag ou SHA completo para execuções reproduzíveis.

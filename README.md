@@ -62,13 +62,16 @@ jobs:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
-      node_version: "22"
       package_manager: npm
 ```
 
 Para Expo/React Native, Next.js ou Spring Boot, use respectivamente `ci-mobile-expo.yml`, `ci-nextjs.yml` ou `ci-spring.yml`. Workflows para título de PR e Commitlint são opcionais e independentes.
 
 Os workflows usam a raiz do repositório como diretório de trabalho padrão. Em monorepos, informe `working_directory` no bloco `with` do workflow consumidor para apontar ao diretório da aplicação.
+
+Os padrões compartilhados são **Node.js 24** e **Java Temurin 17**, definidos em `.github/workflows/runtime-versions.yml`. Os workflows de Node, Expo, Next.js, Commitlint, Spring e atualização de dependências herdam essas versões. Informe `node_version` ou `java_version` somente quando o projeto precisar de uma versão diferente.
+
+As Actions externas são fixadas por SHA imutável. Quando uma Action for atualizada, mantenha o mesmo SHA e comentário de versão em todas as ocorrências correspondentes; a lista e a política ficam documentadas em [versões e atualizações](docs/versions.md).
 
 Consulte o [guia de integração](docs/adding-a-project.md) para exemplos e inputs.
 

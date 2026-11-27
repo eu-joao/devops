@@ -1,0 +1,36 @@
+name: Runtime versions
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: Sobrescrita opcional da versão padrão do Node.js
+        type: string
+        default: ""
+      java_version:
+        description: Sobrescrita opcional da versão padrão do Java
+        type: string
+        default: ""
+    outputs:
+      node_version:
+        description: Versão efetiva do Node.js
+        value: ${{ jobs.resolve.outputs.node_version }}
+      java_version:
+        description: Versão efetiva do Java
+        value: ${{ jobs.resolve.outputs.java_version }}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      node_version: ${{ steps.versions.outputs.node_version }}
+      java_version: ${{ steps.versions.outputs.java_version }}
+    steps:
+      - name: Resolver versões padrão
+        id: versions
+        env:
+          NODE_VERSION_OVERRIDE: ${{ inputs.node_version }}
+          JAVA_VERSION_OVERRIDE: ${{ inputs.java_version }}
+        run: |
+          echo "node_version=${NODE_VERSION_OVERRIDE:-24}" >> "$GITHUB_OUTPUT"
+          echo "java_version=${JAVA_VERSION_OVERRIDE:-17}" >> "$GITHUB_OUTPUT"

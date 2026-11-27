@@ -6,14 +6,21 @@ on:
       java_version:
         description: Versão do Java
         type: string
-        default: "21"
+        default: ""
       working_directory:
         description: Pasta do projeto Maven dentro do repositório
         type: string
         default: "."
 
 jobs:
+  runtime:
+    uses: eu-joao/devops/.github/workflows/runtime-versions.yml@main
+    with:
+      node_version: ${{ inputs.node_version }}
+      java_version: ${{ inputs.java_version }}
+
   build:
+    needs: runtime
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -29,7 +36,7 @@ jobs:
       - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
-          java-version: ${{ inputs.java_version }}
+          java-version: ${{ needs.runtime.outputs.java_version }}
           cache: maven
 
       - name: Build e testes
