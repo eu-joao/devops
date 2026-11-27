@@ -66,7 +66,7 @@ jobs:
       package_manager: npm
 ```
 
-Para Expo/React Native, Next.js ou Spring Boot, use respectivamente `ci-mobile-expo.yml`, `ci-nextjs.yml` ou `ci-spring.yml`. Workflows para título de PR, Commitlint e Markdownlint são opcionais e independentes.
+Para Expo/React Native, Next.js ou Spring Boot, use respectivamente `ci-mobile-expo.yml`, `ci-nextjs.yml` ou `ci-spring.yml`. Workflows para título de PR, Commitlint e Markdownlint são opcionais e independentes. O Markdownlint verifica `**/*.md` por padrão e desativa `MD013` (comprimento de linha); projetos podem sobrescrever esse padrão ou configurar outras regras em `.markdownlint-cli2.yaml` ou `.markdownlint.yaml`.
 
 Os workflows usam a raiz do repositório como diretório de trabalho padrão. Em monorepos, informe `working_directory` no bloco `with` do workflow consumidor para apontar ao diretório da aplicação.
 
