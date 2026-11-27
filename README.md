@@ -32,6 +32,7 @@ agents/
   runtime/
   providers/
   auth/
+.agents/
   skills/
 docs/
 prompts/
