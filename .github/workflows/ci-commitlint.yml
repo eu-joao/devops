@@ -42,7 +42,7 @@ jobs:
       - name: Instalar Commitlint
         run: | # zizmor: ignore[adhoc-packages] Commitlint is installed as an isolated CI tool
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
-            @commitlint/cli@21.2.4 @commitlint/config-conventional@21.2.4
+            @commitlint/cli@20.5.3 @commitlint/config-conventional@20.5.3
 
       - name: Verificar commits do PR
         env:
