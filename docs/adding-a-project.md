@@ -89,9 +89,9 @@ jobs:
       working_directory: frontend
 ```
 
-### Título de PR e mensagens de commit
+### Verificações adicionais
 
-Essas verificações são workflows separados para que cada projeto escolha se deseja adotá-las:
+Título de PR, mensagens de commit e Markdownlint são workflows separados para que cada projeto escolha quais verificações deseja adotar:
 
 ```yaml
 jobs:
@@ -104,9 +104,16 @@ jobs:
     permissions:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-commitlint.yml@main
+
+  markdownlint:
+    permissions:
+      contents: read
+    uses: eu-joao/devops/.github/workflows/ci-markdownlint.yml@main
 ```
 
 O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, uma configuração e lockfile compatíveis com o gerenciador escolhido.
+
+O workflow de Markdownlint verifica `**/*.md` por padrão. Use o input `globs` para restringir ou ampliar os arquivos verificados.
 
 ## 2. Configuração de pacotes
 
