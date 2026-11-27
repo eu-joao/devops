@@ -40,8 +40,8 @@ jobs:
           node-version: ${{ needs.runtime.outputs.node_version }}
 
       - name: Instalar Commitlint
+        # zizmor: ignore[adhoc-packages]
         run: |
-          # zizmor: ignore[adhoc-packages] -- Commitlint is a CI tool installed independently of consumer dependencies.
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
             @commitlint/cli@20 @commitlint/config-conventional@20
 
