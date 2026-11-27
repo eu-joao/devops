@@ -9,7 +9,7 @@ Os workflows reutilizáveis compartilham os seguintes padrões, definidos em `.g
 | Node.js | 24 |
 | Java | Temurin 17 |
 
-Os workflows consumidores aceitam `node_version` e/ou `java_version` como inputs opcionais. Quando omitidos ou vazios, o resolvedor fornece os padrões acima. A sobrescrita deve ser usada apenas quando houver requisito de compatibilidade do projeto. O resolvedor é chamado por caminho relativo (`./.github/workflows/runtime-versions.yml`), portanto acompanha automaticamente a mesma branch, tag ou SHA do workflow consumidor.
+Os workflows consumidores aceitam `node_version` e/ou `java_version` como inputs opcionais. Quando omitidos ou vazios, o resolvedor fornece os padrões acima. A sobrescrita deve ser usada apenas quando houver requisito de compatibilidade do projeto.
 
 Workflows que herdam os padrões:
 

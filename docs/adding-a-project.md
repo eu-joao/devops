@@ -54,6 +54,7 @@ jobs:
       contents: read
     uses: eu-joao/devops/.github/workflows/ci-nextjs.yml@main
     with:
+      node_version: "24"
       package_manager: npm
 ```
 
@@ -132,4 +133,4 @@ A CI determinística não depende de secrets de IA nem de GitHub App.
 
 ## 5. Fixe uma versão
 
-Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Os padrões de runtime são resolvidos pelo workflow compartilhado `runtime-versions.yml`, chamado por caminho relativo. Assim, ele sempre acompanha exatamente a mesma referência (branch, tag ou SHA) do workflow consumidor. Depois de validar uma versão estável, prefira uma tag ou SHA completo para execuções reproduzíveis.
+Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Os padrões de runtime são resolvidos pelo workflow compartilhado `runtime-versions.yml`; ao fixar os workflows centrais em uma tag ou SHA, mantenha também a referência desse resolvedor alinhada à mesma versão estável. Depois de validar uma versão estável, prefira uma tag ou SHA completo para execuções reproduzíveis.
