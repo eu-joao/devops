@@ -8,13 +8,9 @@ on:
         type: string
         default: ""
       working_directory:
-        description: Diretório com package.json, lockfile e configuração do Commitlint
+        description: Diretório com a configuração do Commitlint
         type: string
         default: "."
-      package_manager:
-        description: Gerenciador de pacotes (npm, pnpm ou yarn)
-        type: string
-        default: npm
 
 jobs:
   runtime:
@@ -42,35 +38,18 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ needs.runtime.outputs.node_version }}
-          cache: ${{ inputs.package_manager }}
-          cache-dependency-path: |
-            ${{ inputs.working_directory }}/package-lock.json
-            ${{ inputs.working_directory }}/pnpm-lock.yaml
-            ${{ inputs.working_directory }}/yarn.lock
 
-      - name: Ativar pnpm
-        if: inputs.package_manager == 'pnpm'
-        run: corepack enable
-
-      - name: Instalar dependências
-        env:
-          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+      - name: Instalar Commitlint
         run: |
-          case "$PACKAGE_MANAGER" in
-            npm) npm ci ;;
-            pnpm) pnpm install --frozen-lockfile ;;
-            yarn) corepack yarn install --immutable ;;
-            *) echo "package_manager inválido: $PACKAGE_MANAGER" >&2; exit 1 ;;
-          esac
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
+            @commitlint/cli@20 @commitlint/config-conventional@20
 
       - name: Verificar commits do PR
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PACKAGE_MANAGER: ${{ inputs.package_manager }}
         run: |
-          case "$PACKAGE_MANAGER" in
-            npm) npx commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
-            pnpm) pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
-            yarn) corepack yarn commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose ;;
-          esac
+          ./node_modules/.bin/commitlint \
+            --from "$BASE_SHA" \
+            --to "$HEAD_SHA" \
+            --verbose
