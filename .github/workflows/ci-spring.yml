@@ -14,7 +14,7 @@ on:
 
 jobs:
   runtime:
-    uses: ./.github/workflows/runtime-versions.yml
+    uses: ./.github/workflows/runtime-versions.yml # zizmor: ignore[self-repository]
     permissions: {}
     with:
       java_version: ${{ inputs.java_version }}
