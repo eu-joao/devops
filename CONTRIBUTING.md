@@ -3,7 +3,7 @@
 ## Organização
 
 - Workflows reutilizáveis ficam em `.github/workflows/`.
-- Skills compartilhadas ficam em `agents/skills/`.
+- Skills compartilhadas ficam em `.agents/skills/`.
 - Scripts e prompts ficam em `scripts/` e `prompts/`.
 - O template de issue fica em `.github/ISSUE_TEMPLATE/`; o de pull request, em `.github/pull_request_template.md`.
 - Projetos consumidores devem manter apenas os workflows chamadores, sem copiar a implementação central.
