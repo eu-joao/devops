@@ -18,7 +18,7 @@ on:
 
 jobs:
   runtime:
-    uses: $/.github/workflows/runtime-versions.yml
+    uses: ./.github/workflows/runtime-versions.yml
     permissions: {}
     with:
       node_version: ${{ inputs.node_version }}
