@@ -1,0 +1,25 @@
+name: CI - Markdownlint
+
+on:
+  workflow_call:
+    inputs:
+      globs:
+        description: Padrões dos arquivos Markdown que serão verificados
+        type: string
+        default: "**/*.md"
+
+jobs:
+  markdownlint:
+    name: Validar Markdown
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: DavidAnson/markdownlint-cli2-action@a23dae216ce3fee4db69da41fed90d2a4af801cf # v19.0.0
+        with:
+          globs: ${{ inputs.globs }}
