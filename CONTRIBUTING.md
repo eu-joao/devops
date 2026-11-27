@@ -2,12 +2,13 @@
 
 ## Organização
 
-- A implementação compartilhada fica em `.github/workflows/`, `agents/`, `scripts/` e `prompts/`.
-- Skills compartilhadas ficam em `agents/skills/`; mantenha instruções genéricas e não inclua dependências específicas de um projeto consumidor.
-- Templates de contribuição ficam em `.github/ISSUE_TEMPLATE/` e `.github/pull_request_template.md`.
-- Projetos consumidores devem precisar apenas de arquivos chamadores pequenos para selecionar workflows e definir eventos e parâmetros. Não reintroduza cópias da implementação nem templates de callers neste repositório.
-- Preserve a separação entre CI determinística e automações opcionais com IA. A CI não deve depender de secrets de provedores ou de um GitHub App.
-- Agentes não podem receber tokens do GitHub; publicação e comentários devem continuar em etapas separadas, usando o GitHub App.
+- Workflows reutilizáveis ficam em `.github/workflows/`.
+- Skills compartilhadas ficam em `agents/skills/`.
+- Scripts e prompts ficam em `scripts/` e `prompts/`.
+- O template de issue fica em `.github/ISSUE_TEMPLATE/`; o de pull request, em `.github/pull_request_template.md`.
+- Projetos consumidores devem manter apenas os workflows chamadores, sem copiar a implementação central.
+- A CI determinística não depende de secrets de IA ou de um GitHub App.
+- Agentes não recebem tokens do GitHub. Publicação e comentários usam um GitHub App em etapas separadas.
 
 ## Branches
 
@@ -17,11 +18,11 @@ Use `<número-da-issue>-<descrição-curta>`, em minúsculas e separado por híf
 
 Use `tipo: descrição`, em português e no imperativo. Tipos: `feat`, `fix`, `docs`, `ci`, `chore`.
 
-## Pull Requests
+## Pull requests
 
-Descreva o que mudou, a issue relacionada e dependências externas. Use o template do repositório. Não faça merge sem revisão humana.
+Descreva o que mudou e informe a issue relacionada. Use o template do repositório. Não faça merge sem revisão humana.
 
-Ao alterar um workflow reutilizável, revise também seus inputs, descrições, permissões e comportamento esperado nos repositórios consumidores. Mantenha as descrições dos inputs: elas facilitam configuração e revisão. Fixe actions externas por SHA completo.
+Ao alterar um workflow reutilizável, revise seus inputs, descrições, permissões e comportamento nos repositórios consumidores. Mantenha as descrições dos inputs e fixe actions externas por SHA completo.
 
 ## Validação local
 
@@ -30,8 +31,8 @@ Ao alterar um workflow reutilizável, revise também seus inputs, descrições, 
 - `actionlint` nos workflows.
 - `zizmor .github/workflows` para análise de segurança.
 
-Os testes automatizados não devem chamar provedores de IA reais nem consumir cotas. Prefira testes com comandos simulados e credenciais fictícias.
+Os testes não devem chamar provedores de IA reais nem consumir cotas. Prefira comandos simulados e credenciais fictícias.
 
 ## CI
 
-O workflow `.github/workflows/ci-devops.yml` executa as verificações do próprio repositório. A CI dos projetos consumidores é fornecida pelos workflows reutilizáveis específicos de cada stack. Mudanças nesses arquivos devem manter a configuração local dos consumidores mínima e compatível.
+O workflow `.github/workflows/ci-devops.yml` valida este repositório. Nos projetos consumidores, use os workflows reutilizáveis específicos de cada stack.
