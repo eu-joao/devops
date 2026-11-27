@@ -63,11 +63,12 @@ jobs:
     uses: eu-joao/devops/.github/workflows/ci-node.yml@main
     with:
       node_version: "22"
-      working_directory: "."
       package_manager: npm
 ```
 
 Para Expo/React Native, Next.js ou Spring Boot, use respectivamente `ci-mobile-expo.yml`, `ci-nextjs.yml` ou `ci-spring.yml`. Workflows para título de PR e Commitlint são opcionais e independentes.
+
+Os workflows usam a raiz do repositório como diretório de trabalho padrão. Em monorepos, informe `working_directory` no bloco `with` do workflow consumidor para apontar ao diretório da aplicação.
 
 Consulte o [guia de integração](docs/adding-a-project.md) para exemplos e inputs.
 
