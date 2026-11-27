@@ -26,11 +26,11 @@ on:
       java_version:
         description: Versão do Java utilizada pelo workflow.
         type: string
-        default: "21"
+        default: ""
       node_version:
         description: Versão do Node.js usada para instalar dependências e executar as verificações.
         type: string
-        default: "22"
+        default: ""
     secrets:
       MISTRAL_VIBE_CODE_KEY:
         required: false
@@ -42,7 +42,15 @@ on:
         required: false
 
 jobs:
+  runtime:
+    uses: ./.github/workflows/runtime-versions.yml # zizmor: ignore[self-repository]
+    permissions: {}
+    with:
+      node_version: ${{ inputs.node_version }}
+      java_version: ${{ inputs.java_version }}
+
   deps:
+    needs: runtime
     runs-on: ubuntu-latest
     timeout-minutes: 40
     permissions:
@@ -65,14 +73,14 @@ jobs:
         uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
-          java-version: ${{ inputs.java_version }}
+          java-version: ${{ needs.runtime.outputs.java_version }}
           cache: maven
 
       - name: Configurar Node
         if: hashFiles('**/package.json') != ''
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: ${{ inputs.node_version }}
+          node-version: ${{ needs.runtime.outputs.node_version }}
 
       - name: Verificar chave do provedor
         id: provider-key

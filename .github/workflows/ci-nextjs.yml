@@ -6,7 +6,7 @@ on:
       node_version:
         description: Versão do Node.js usada pelo projeto
         type: string
-        default: "24"
+        default: ""
       working_directory:
         description: "Diretório do aplicativo Next.js (padrão: raiz do repositório)"
         type: string
@@ -33,7 +33,14 @@ on:
         default: true
 
 jobs:
+  runtime:
+    uses: ./.github/workflows/runtime-versions.yml # zizmor: ignore[self-repository]
+    permissions: {}
+    with:
+      node_version: ${{ inputs.node_version }}
+
   web:
+    needs: runtime
     name: Validar aplicativo Next.js
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -49,7 +56,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: ${{ inputs.node_version }}
+          node-version: ${{ needs.runtime.outputs.node_version }}
           cache: ${{ inputs.package_manager }}
           cache-dependency-path: |
             ${{ inputs.working_directory }}/package-lock.json

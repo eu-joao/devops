@@ -6,7 +6,7 @@ on:
       node_version:
         description: Versão do Node.js
         type: string
-        default: "22"
+        default: ""
       working_directory:
         description: Diretório do projeto
         type: string
@@ -29,7 +29,14 @@ on:
         default: true
 
 jobs:
+  runtime:
+    uses: ./.github/workflows/runtime-versions.yml # zizmor: ignore[self-repository]
+    permissions: {}
+    with:
+      node_version: ${{ inputs.node_version }}
+
   build:
+    needs: runtime
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -46,7 +53,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: ${{ inputs.node_version }}
+          node-version: ${{ needs.runtime.outputs.node_version }}
           cache: ${{ inputs.package_manager }}
           cache-dependency-path: |
             ${{ inputs.working_directory }}/package-lock.json
