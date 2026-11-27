@@ -8,9 +8,9 @@ on:
         type: string
         default: "24"
       working_directory:
-        description: Diretório do aplicativo Expo
+        description: Diretório do aplicativo Expo (padrão: raiz do repositório)
         type: string
-        default: "mobile"
+        default: "."
       package_manager:
         description: Gerenciador de pacotes (npm, pnpm ou yarn)
         type: string
