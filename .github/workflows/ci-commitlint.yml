@@ -44,6 +44,14 @@ jobs:
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund \
             @commitlint/cli@20.5.3 @commitlint/config-conventional@20.5.3
 
+      - name: Criar configuração padrão
+        run: |
+          cat > commitlint.config.cjs <<'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+          };
+          EOF
+
       - name: Verificar commits do PR
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
