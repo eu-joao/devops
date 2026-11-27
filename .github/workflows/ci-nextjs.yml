@@ -34,10 +34,9 @@ on:
 
 jobs:
   runtime:
-    uses: eu-joao/devops/.github/workflows/runtime-versions.yml@main
+    uses: ./.github/workflows/runtime-versions.yml
     with:
       node_version: ${{ inputs.node_version }}
-      java_version: ${{ inputs.java_version }}
 
   web:
     needs: runtime
