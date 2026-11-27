@@ -113,7 +113,7 @@ jobs:
 
 O workflow de Commitlint pressupõe que o projeto já tenha `@commitlint/cli`, uma configuração e lockfile compatíveis com o gerenciador escolhido.
 
-O workflow de Markdownlint verifica `**/*.md` por padrão. Use o input `globs` para restringir ou ampliar os arquivos verificados.
+O workflow de Markdownlint verifica `**/*.md` por padrão e desativa `MD013` (comprimento de linha). Projetos podem sobrescrever esse padrão ou configurar outras regras em `.markdownlint-cli2.yaml` ou `.markdownlint.yaml`. Use o input `globs` para restringir ou ampliar os arquivos verificados.
 
 ## 2. Configuração de pacotes
 
