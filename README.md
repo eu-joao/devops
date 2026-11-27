@@ -10,7 +10,6 @@ Workflows reutilizáveis de CI, instruções para agentes e skills compartilhada
 - Provedor, autenticação e modo de execução são configurações separadas.
 - Agentes não recebem tokens do GitHub. Ações de publicação usam um GitHub App.
 - Testes automatizados não chamam modelos reais nem consomem cotas.
-- Templates e skills ficam centralizados como referência; distribuição para outros repositórios será tratada separadamente.
 - CD será considerado somente depois da estabilização do CI.
 
 ## Estrutura
@@ -37,7 +36,7 @@ agents/
 docs/
 prompts/
 scripts/
-templates/                 # templates de container
+templates/
 tests/
 AGENTS.md
 ```
@@ -73,12 +72,6 @@ Os workflows usam a raiz do repositório como diretório de trabalho padrão. Em
 Consulte o [guia de integração](docs/adding-a-project.md) para exemplos e inputs.
 
 Durante o desenvolvimento, `@main` acompanha as alterações mais recentes. Para execuções reproduzíveis, prefira uma tag estável ou SHA completo. Não são necessários secrets para usar os workflows determinísticos.
-
-## Templates e skills
-
-Os templates de issue e PR ficam em `.github/ISSUE_TEMPLATE/` e `.github/pull_request_template.md`. As skills compartilhadas estão em [`agents/skills/`](agents/skills/README.md). Consulte [AGENTS.md](AGENTS.md) para instruções gerais destinadas a agentes.
-
-Esses arquivos são mantidos neste repositório. A instalação ou sincronização automática para projetos consumidores não está incluída.
 
 ## Habilitar agentes (opcional)
 
