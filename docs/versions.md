@@ -30,6 +30,7 @@ As Actions externas são fixadas por SHA completo, não por tags mutáveis. As r
 | `actions/setup-node` | v7.1.0 |
 | `actions/setup-java` | v6.3.0 |
 | `actions/create-github-app-token` | v3.4.0 |
+| `DavidAnson/markdownlint-cli2-action` | v19.0.0 |
 | `rhysd/actionlint` | imagem Docker fixada por digest |
 
 Ao atualizar uma Action:
