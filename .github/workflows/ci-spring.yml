@@ -20,6 +20,7 @@ jobs:
       java_version: ${{ inputs.java_version }}
 
   build:
+    name: Backend (Spring Boot)
     needs: runtime
     runs-on: ubuntu-latest
     timeout-minutes: 20
