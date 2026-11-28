@@ -14,6 +14,7 @@ on:
 
 jobs:
   runtime:
+    name: Resolver versões de runtime
     uses: ./.github/workflows/runtime-versions.yml # zizmor: ignore[self-repository]
     permissions: {}
     with:
