@@ -10,9 +10,17 @@
 - A CI determinística não depende de secrets de IA ou de um GitHub App.
 - Agentes não recebem tokens do GitHub. Publicação e comentários usam um GitHub App em etapas separadas.
 
-## Branches
+## Estratégia de branches
 
-Use `<número-da-issue>-<descrição-curta>`, em minúsculas e separado por hífen.
+Adotamos Trunk-Based Development:
+
+- `main` é a única branch permanente e deve permanecer funcional.
+- Crie branches curtas e descritivas para cada alteração, sem exigir número de issue.
+- Use prefixos como `feat/`, `fix/`, `docs/`, `ci/`, `chore/` e `test/`.
+- Abra PRs diretamente para `main`, aguarde os checks e a revisão humana antes do merge.
+- Faça merge assim que a alteração estiver pronta e exclua a branch após o merge.
+- Evite branches de integração ou desenvolvimento de longa duração.
+- Use tags para marcar versões e releases.
 
 ## Commits
 
@@ -20,7 +28,7 @@ Use `tipo: descrição`, em português e no imperativo. Tipos: `feat`, `fix`, `d
 
 ## Pull requests
 
-Descreva o que mudou e informe a issue relacionada. Use o template do repositório. Não faça merge sem revisão humana.
+Direcione os PRs para `main`. Descreva o que mudou e informe a issue relacionada quando existir. Use o template do repositório. Não faça merge sem revisão humana.
 
 Ao alterar um workflow reutilizável, revise seus inputs, descrições, permissões e comportamento nos repositórios consumidores. Mantenha as descrições dos inputs e fixe actions externas por SHA completo.
 
