@@ -6,6 +6,18 @@ A implementação da CI é mantida em `eu-joao/devops`. No projeto consumidor, c
 
 Não copie etapas, scripts ou arquivos de implementação para o projeto consumidor.
 
+### Estratégia de branches
+
+Use Trunk-Based Development nos projetos:
+
+- `main` é a única branch permanente e deve permanecer funcional.
+- Crie branches curtas e descritivas, como `feat/game-board`, `fix/win-detection`, `docs/setup-guide` ou `ci/android-build`.
+- Não exija número de issue no nome da branch.
+- Abra PRs diretamente para `main` e faça merge depois da aprovação dos checks e da revisão.
+- Exclua branches após o merge. Use tags para releases.
+
+O workflow chamador deve executar a CI em PRs destinados a `main` e em pushes para `main`. Não crie uma branch permanente `dev` apenas para integração.
+
 ### Vue, React ou outro projeto Node
 
 Use `ci-node.yml` para verificações genéricas de Node:
@@ -17,6 +29,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
   ci:
