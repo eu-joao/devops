@@ -25,7 +25,8 @@ Se o comando `gh` não existir ou não estiver autenticado, siga o plano B.
 
 Consulte o `CONTRIBUTING.md` e o template de PR para identificar:
 
-- Formato do nome da branch.
+- Estratégia de branches e branch-base.
+- Formato do nome da branch, se definido.
 - Convenção de mensagens de commit.
 - Seções e ordem exigidas na descrição do PR.
 - Forma de referenciar a issue.
@@ -34,12 +35,13 @@ Se não houver convenção documentada, pergunte ao usuário antes de inventar u
 
 ## Passo 3 — Executar
 
-1. **Branch:** se estiver em `main` ou `master`, crie uma branch no formato definido pelo repositório. Se o número da issue for obrigatório e desconhecido, pergunte.
+1. **Branch:** siga a estratégia documentada pelo repositório. Em Trunk-Based Development, crie uma branch curta e descritiva a partir de `main`, sem exigir número de issue. Não crie branches permanentes de integração.
 2. **Stage:** adicione apenas os arquivos relacionados à tarefa. Não inclua arquivos sensíveis, saídas de build ou alterações alheias.
 3. **Commits:** agrupe alterações por escopo e responsabilidade. Faça commits separados quando houver unidades independentes, sem criar um commit por arquivo. Respeite o formato, o idioma e os limites definidos pelo repositório.
 4. **Coautoria:** quando a IA tiver contribuído de forma relevante, inclua o trailer de coautoria com a identidade configurada pelo usuário ou pela ferramenta. Não invente nome ou endereço de e-mail.
 5. **Push:** publique com `git push -u origin <branch>`. Nunca use `--force`.
-6. **PR:** com `gh` autenticado, crie o PR usando o template do repositório. Use `--draft` quando solicitado.
+6. **PR:** abra o PR para a branch-base definida pelo repositório (em Trunk-Based Development, `main`) e use o template. Use `--draft` quando solicitado.
+7. **Limpeza:** após o merge, exclua a branch de trabalho quando não houver motivo para mantê-la.
 
 Não faça push, publique branches ou abra PR sem solicitação explícita do usuário.
 
