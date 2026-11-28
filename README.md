@@ -12,6 +12,10 @@ Workflows reutilizáveis de CI, instruções para agentes e skills compartilhada
 - Testes automatizados não chamam modelos reais nem consomem cotas.
 - CD será considerado somente depois da estabilização do CI.
 
+## Estratégia de branches
+
+Este repositório e os projetos consumidores adotam Trunk-Based Development: `main` é a única branch permanente; alterações são desenvolvidas em branches curtas e descritivas e integradas por PRs diretamente em `main`. Consulte o [guia de contribuição](CONTRIBUTING.md) e o [guia de integração](docs/adding-a-project.md).
+
 ## Estrutura
 
 ```text
