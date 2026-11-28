@@ -102,7 +102,7 @@ Antes de finalizar, confirme que cada apontamento foi introduzido pelo PR, tem e
 
 ## Formato do relatório
 
-# Revisão do PR #N
+## Revisão do PR #N
 
 **Resultado:** requer correções / sem problemas confirmados — pronto para revisão humana / inconclusivo.
 
